@@ -461,6 +461,11 @@ export default function PortfolioExperience() {
               )}
             />
           </div>
+          <div className="pf-skill-grid">
+            {skillShowcase.map((s, i) => (
+              <span key={s.name}><AsciiGlitchRipple as="span">{`${String(i + 1).padStart(2, "0")} · ${s.name}`}</AsciiGlitchRipple></span>
+            ))}
+          </div>
         </section>
 
         <section className="pf-stats">

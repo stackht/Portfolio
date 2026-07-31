@@ -5170,3 +5170,38 @@ body:has(.cm-access) {
     visibility: hidden;
   }
 }
+/* Skills: light grid on small screens (heavy 3D cylinder only on desktop) */
+.pf-skill-grid {
+  display: none;
+}
+.pf-skill-grid span {
+  padding: 8px 14px;
+  border: 1px solid rgba(56, 189, 248, .35);
+  background: #322E3F;
+  border-radius: 999px;
+  color: rgba(240, 246, 255, .85);
+  font: 500 11px var(--font-mono);
+}
+
+@media (max-width: 900px) {
+  .pf-skill-carousel {
+    display: none;
+  }
+  .pf-skill-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 24px;
+  }
+}
+@media (max-width: 900px) {
+  /* Cheap mobile rendering: drop full-screen grain + heavy header blur */
+  .pf-grain {
+    display: none;
+  }
+  header [class*="backdrop-blur"] {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+}
