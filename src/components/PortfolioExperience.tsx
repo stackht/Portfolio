@@ -5,6 +5,7 @@ import dynamic from "next/dynamic"
 import { motion, useMotionValueEvent, useScroll, useSpring, useTransform } from "framer-motion"
 import Lenis from "lenis"
 import CursorGlow from "./CursorGlow"
+import { Github, Linkedin, FileText } from "lucide-react"
 import LiquidMetalButton from "./ui/LiquidMetalButton"
 import AsciiGlitchRipple from "./ui/AsciiGlitchRipple"
 import CylinderCarousel from "./ui/CylinderCarousel"
@@ -521,21 +522,22 @@ export default function PortfolioExperience() {
                 </div>
                 <div className="pf-contact-links">
                   {[
-                    { label: "GitHub", href: GITHUB_URL, external: true },
-                    { label: "LinkedIn", href: LINKEDIN_URL, external: true },
-                    { label: "Resume", href: RESUME_URL, external: false },
-                  ].map(({ label, href, external }) => (
+                    { label: "GitHub", href: GITHUB_URL, external: true, icon: <Github /> },
+                    { label: "LinkedIn", href: LINKEDIN_URL, external: true, icon: <Linkedin /> },
+                    { label: "Resume", href: RESUME_URL, external: false, icon: <FileText /> },
+                  ].map(({ label, href, external, icon }) => (
                     <LiquidMetalButton
                       key={label}
                       size="md"
                       className="px-10"
                       metalConfig={METAL}
+                      icon={icon}
                       onClick={() => {
                         if (external) window.open(href, "_blank")
                         else window.location.href = href
                       }}
                     >
-                      <AsciiGlitchRipple as="span">{label}</AsciiGlitchRipple>
+                      <span className="pf-btn-label">{label}</span>
                     </LiquidMetalButton>
                   ))}
                 </div>
