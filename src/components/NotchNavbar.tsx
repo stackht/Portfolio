@@ -54,7 +54,7 @@ export function NotchNavbar({
     <>
       <header className={cn("fixed top-0 inset-x-0 z-50 h-16 flex px-0", className)} {...props}>
         {/* Left side bar */}
-        <div className="flex-1 h-10 bg-[#23212C]/70 backdrop-blur-md z-20 relative min-w-0">
+        <div className="flex-1 h-10 bg-[#23212C] z-20 relative min-w-0">
           <svg className="absolute inset-0 w-full h-full">
             <line x1="0" y1="39.5" x2="100%" y2="39.5" stroke="#f0f6ff" strokeOpacity={0.05} strokeWidth={0.5} />
             <line x1="0" y1="36.5" x2="100%" y2="36.5" stroke="#f0f6ff" strokeOpacity={0.05} strokeWidth={0.5} />
@@ -66,7 +66,7 @@ export function NotchNavbar({
           {/* Left corner */}
           <div className="w-[50px] h-full relative shrink-0">
             <div
-              className="absolute inset-0 bg-[#23212C]/70 backdrop-blur-md"
+              className="absolute inset-0 bg-[#23212C]"
               style={{ clipPath: "path('M0 0 H50 V64 C25 64 25 40 0 40 Z')" }}
             />
             <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 50 64">
@@ -77,7 +77,7 @@ export function NotchNavbar({
 
           {/* Center */}
           <div className="flex-1 h-full relative min-w-0 -ml-px">
-            <div className="absolute inset-0 bg-[#23212C]/70 backdrop-blur-md">
+            <div className="absolute inset-0 bg-[#23212C]">
               <svg className="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="none">
                 <line x1="0" y1="63.5" x2="100%" y2="63.5" stroke="#f0f6ff" strokeOpacity={0.05} strokeWidth={0.5} />
                 <line x1="0" y1="60.5" x2="100%" y2="60.5" stroke="#f0f6ff" strokeOpacity={0.05} strokeWidth={0.5} />
@@ -131,7 +131,7 @@ export function NotchNavbar({
           {/* Right corner */}
           <div className="w-[50px] h-full relative shrink-0 -ml-px">
             <div
-              className="absolute inset-0 bg-[#23212C]/70 backdrop-blur-md"
+              className="absolute inset-0 bg-[#23212C]"
               style={{ clipPath: "path('M0 0 H50 V40 C25 40 25 64 0 64 Z')" }}
             />
             <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 50 64">
@@ -142,7 +142,7 @@ export function NotchNavbar({
         </div>
 
         {/* Right side bar */}
-        <div className="flex-1 h-10 bg-[#23212C]/70 backdrop-blur-md z-20 relative min-w-0 -ml-px">
+        <div className="flex-1 h-10 bg-[#23212C] z-20 relative min-w-0 -ml-px">
           <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
             <line x1="0" y1="39.5" x2="100%" y2="39.5" stroke="#f0f6ff" strokeOpacity={0.05} strokeWidth={0.5} />
             <line x1="0" y1="36.5" x2="100%" y2="36.5" stroke="#f0f6ff" strokeOpacity={0.05} strokeWidth={0.5} />
@@ -157,7 +157,7 @@ export function NotchNavbar({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-x-0 top-16 z-40 bg-[#23212C]/70 backdrop-blur-md border-b border-[#f0f6ff]/5 p-4 md:hidden shadow-lg"
+            className="fixed inset-x-0 top-16 z-40 bg-[#23212C] border-b border-[#f0f6ff]/5 p-4 md:hidden shadow-lg"
           >
             <nav className="flex flex-col gap-2">
               {[...NAV.left, ...NAV.right].map((item) => {

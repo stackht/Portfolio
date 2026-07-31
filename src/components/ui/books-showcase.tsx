@@ -195,7 +195,7 @@ export function BooksShowcase({
     try {
       renderer = new THREE.WebGLRenderer({
         canvas: canvasEl,
-        antialias: !window.matchMedia('(pointer: coarse)').matches,
+        antialias: true,
         alpha: true,
       });
     } catch (err) {
@@ -214,7 +214,7 @@ export function BooksShowcase({
     // every place that would use innerWidth/innerHeight reads from `dims`.
     const dims = { w: 0, h: 0 };
 
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 0.92;
@@ -260,7 +260,7 @@ export function BooksShowcase({
     const key = new THREE.DirectionalLight(0xffffff, 0.82);
     key.position.set(3.5, 5, 6);
     key.castShadow = true;
-    key.shadow.mapSize.set(1024, 1024);
+    key.shadow.mapSize.set(2048, 2048);
     key.shadow.camera.left = -4;
     key.shadow.camera.right = 4;
     key.shadow.camera.top = 4;
@@ -1637,7 +1637,7 @@ export function BooksShowcase({
         </span>
       </div>
 
-      <canvas ref={canvasRef} className="absolute inset-0 z-[2] block h-full w-full touch-none" />
+      <canvas ref={canvasRef} className="absolute inset-0 z-[2] block h-full w-full touch-pan-y" />
 
       {showNav && (
         <nav className="pointer-events-none absolute inset-x-0 top-0 z-40 flex items-center justify-between px-[42px] py-[26px] max-[760px]:px-5 max-[760px]:py-[18px]">

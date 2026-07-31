@@ -257,7 +257,7 @@ export default function ParticleBackground({
     >
       <GLGuard>
         <Canvas
-          dpr={[0.6, 1.25]}
+          dpr={[1, 1.8]}
           camera={{ position: [0, 0, 9.5], fov: 50 }}
           gl={{
             antialias: true,
