@@ -15,8 +15,7 @@ class GLGuard extends Component<{ children: ReactNode }, { err: boolean }> {
   }
 }
 
-const IS_SMALL = typeof window !== "undefined" && window.innerWidth < 768
-const N = IS_SMALL ? 500 : 1200
+const N = 1200
 
 function easeInOut(t: number) {
   return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t

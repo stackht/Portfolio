@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import dynamic from "next/dynamic"
-import { motion, useInView, useMotionValueEvent, useScroll, useSpring, useTransform } from "framer-motion"
+import { motion, useMotionValueEvent, useScroll, useSpring, useTransform } from "framer-motion"
 import Lenis from "lenis"
 import CursorGlow from "./CursorGlow"
 import LiquidMetalButton from "./ui/LiquidMetalButton"
@@ -195,7 +195,7 @@ function FloatingParticles() {
 
 function BootSequence({ onComplete }: { onComplete: () => void }) {
   const [phase, setPhase] = useState(0)
-  const lines = ["HEMANT THAKUR", "HEMANT.DEV // PORTFOLIO", "LOADING EXPERIENCE"]
+  const lines = ["HEMANT THAKUR", "HEMANT.DEV // PORTFOLIO", "INITIALIZING SCENES", "LOADING EXPERIENCE"]
   const onCompleteRef = useRef(onComplete)
 
   useEffect(() => {
@@ -222,10 +222,10 @@ function BootSequence({ onComplete }: { onComplete: () => void }) {
 
   useEffect(() => {
     if (phase >= lines.length) {
-      const timer = setTimeout(() => onCompleteRef.current(), 150)
+      const timer = setTimeout(() => onCompleteRef.current(), 1400)
       return () => clearTimeout(timer)
     }
-    const timer = setTimeout(() => setPhase((p) => p + 1), 120 + phase * 100)
+    const timer = setTimeout(() => setPhase((p) => p + 1), 200 + phase * 170)
     return () => clearTimeout(timer)
   }, [phase])
 
@@ -267,16 +267,10 @@ function ProjectsSection() {
   const carouselRef = useRef<((dir: 1 | -1) => void) | null>(null)
   const pendingRef = useRef(0)
   const targetRef = useRef(0)
-  const inView = useInView(sectionRef, { margin: "0px 0px 120% 0px" })
-  const [booksMounted, setBooksMounted] = useState(false)
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end end"],
   })
-
-  useEffect(() => {
-    if (inView) setBooksMounted(true)
-  }, [inView])
 
   useMotionValueEvent(scrollYProgress, "change", (v) => {
     targetRef.current = Math.min(
@@ -310,18 +304,14 @@ function ProjectsSection() {
           <p><AsciiGlitchRipple as="span">Four projects. Keep scrolling — the shelf turns with you.</AsciiGlitchRipple></p>
         </div>
         <div className="pf-books">
-          {booksMounted ? (
-            <BooksShowcase
-              books={PROJECT_BOOKS}
-              themeColors={BS_THEME}
-              heroTitle=""
-              showNav={false}
-              showCarousel={false}
-              carouselRef={carouselRef}
-            />
-          ) : (
-            <div className="pf-books-placeholder" aria-hidden="true" />
-          )}
+          <BooksShowcase
+            books={PROJECT_BOOKS}
+            themeColors={BS_THEME}
+            heroTitle=""
+            showNav={false}
+            showCarousel={false}
+            carouselRef={carouselRef}
+          />
         </div>
       </div>
     </section>
@@ -337,15 +327,9 @@ export default function PortfolioExperience() {
   const heroOpacity = useTransform(progress, [0, 0.14], [1, 0])
 
   const { displayed: kickerText, done: kickerDone } = useTypewriter("computer engineering student", 32)
-  const [sceneReady, setSceneReady] = useState(false)
 
   useEffect(() => {
-    const t = setTimeout(() => setBootComplete(true), 4000)
-    return () => clearTimeout(t)
-  }, [])
-
-  useEffect(() => {
-    const t = setTimeout(() => setSceneReady(true), 1200)
+    const t = setTimeout(() => setBootComplete(true), 7000)
     return () => clearTimeout(t)
   }, [])
 
@@ -371,7 +355,7 @@ export default function PortfolioExperience() {
 
   return (
     <div className="pf-site">
-      {sceneReady && <ParticleBackground scrollRef={scrollRef} />}
+      <ParticleBackground scrollRef={scrollRef} />
       {!bootComplete && <BootSequence onComplete={() => setBootComplete(true)} />}
       <div className="pf-grain" aria-hidden="true" />
       <CursorGlow />
@@ -460,11 +444,6 @@ export default function PortfolioExperience() {
                 </div>
               )}
             />
-          </div>
-          <div className="pf-skill-grid">
-            {skillShowcase.map((s, i) => (
-              <span key={s.name}><AsciiGlitchRipple as="span">{`${String(i + 1).padStart(2, "0")} · ${s.name}`}</AsciiGlitchRipple></span>
-            ))}
           </div>
         </section>
 

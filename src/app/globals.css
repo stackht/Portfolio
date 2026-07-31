@@ -5146,62 +5146,14 @@ body:has(.cm-access) {
     transform: scale(0.24) !important;
   }
 }
-.pf-books-placeholder {
-  width: 100%;
-  height: 100%;
-  display: grid;
-  place-items: center;
-  background: radial-gradient(circle at 50% 55%, rgba(56, 189, 248, .07), transparent 55%);
-}
-.pf-books-placeholder::after {
-  content: "INITIALIZING SHELF";
-  color: rgba(240, 246, 255, .3);
-  font: 500 9px var(--font-mono);
-  letter-spacing: .2em;
-}
 /* Boot splash: never blocks, auto-fades out regardless of JS timing */
 .pf-boot {
   pointer-events: none;
-  animation: pfBootExit 0.25s ease 1.7s forwards;
+  animation: pfBootExit 0.25s ease 3.6s forwards;
 }
 @keyframes pfBootExit {
   to {
     opacity: 0;
     visibility: hidden;
-  }
-}
-/* Skills: light grid on small screens (heavy 3D cylinder only on desktop) */
-.pf-skill-grid {
-  display: none;
-}
-.pf-skill-grid span {
-  padding: 8px 14px;
-  border: 1px solid rgba(56, 189, 248, .35);
-  background: #322E3F;
-  border-radius: 999px;
-  color: rgba(240, 246, 255, .85);
-  font: 500 11px var(--font-mono);
-}
-
-@media (max-width: 900px) {
-  .pf-skill-carousel {
-    display: none;
-  }
-  .pf-skill-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 24px;
-  }
-}
-@media (max-width: 900px) {
-  /* Cheap mobile rendering: drop full-screen grain + heavy header blur */
-  .pf-grain {
-    display: none;
-  }
-  header [class*="backdrop-blur"] {
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
   }
 }
