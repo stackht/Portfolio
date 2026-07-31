@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="430" viewBox="0 0 800 430" fill="none">
+  <rect width="800" height="430" fill="#04070F"/>
+  <g stroke="#38BDF8" stroke-opacity=".06">
+    <path d="M0 43H800 M0 86H800 M0 129H800 M0 172H800 M0 215H800 M0 258H800 M0 301H800 M0 344H800 M0 387H800"/>
+    <path d="M66 0V430 M133 0V430 M200 0V430 M266 0V430 M333 0V430 M400 0V430 M466 0V430 M533 0V430 M600 0V430 M666 0V430 M733 0V430"/>
+  </g>
+  <text x="26" y="48" fill="#38BDF8" font-size="16" font-family="monospace" letter-spacing="4">PROJECT 04 // ROBOTICS</text>
+  <text x="764" y="48" fill="#818CF8" fill-opacity=".7" font-size="16" font-family="monospace" text-anchor="end">.SVG</text>
+  <text x="54" y="330" fill="#38BDF8" fill-opacity=".16" font-size="300" font-family="monospace" font-weight="700">04</text>
+  <g transform="translate(500 110)">
+    <g stroke="#38BDF8" stroke-opacity=".4" stroke-width="2" fill="none">
+      <path d="M0 200 H280"/>
+      <path d="M0 160 H280 M0 120 H280 M0 80 H280 M0 40 H280"/>
+    </g>
+    <rect x="20" y="120" width="34" height="80" fill="#38BDF8" fill-opacity=".9"/>
+    <rect x="84" y="80" width="34" height="120" fill="#A5C6FF" fill-opacity=".85"/>
+    <rect x="148" y="120" width="34" height="80" fill="#38BDF8" fill-opacity=".6"/>
+    <rect x="212" y="30" width="34" height="170" fill="#38BDF8" fill-opacity="1"/>
+    <polyline points="20,100 50,70 101,110 151,60 229,88" fill="none" stroke="#EAF0F6" stroke-opacity=".9" stroke-width="3"/>
+    <circle cx="229" cy="88" r="6" fill="#EAF0F6"/>
+  </g>
+  <circle cx="52" cy="376" r="4" fill="#38BDF8"/>
+  <circle cx="70" cy="376" r="4" fill="#38BDF8" fill-opacity=".5"/>
+  <circle cx="88" cy="376" r="4" fill="#38BDF8" fill-opacity=".25"/>
+</svg>

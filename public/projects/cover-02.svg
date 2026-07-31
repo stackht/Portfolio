@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="430" viewBox="0 0 800 430" fill="none">
+  <rect width="800" height="430" fill="#04070F"/>
+  <g stroke="#38BDF8" stroke-opacity=".06">
+    <path d="M0 43H800 M0 86H800 M0 129H800 M0 172H800 M0 215H800 M0 258H800 M0 301H800 M0 344H800 M0 387H800"/>
+    <path d="M66 0V430 M133 0V430 M200 0V430 M266 0V430 M333 0V430 M400 0V430 M466 0V430 M533 0V430 M600 0V430 M666 0V430 M733 0V430"/>
+  </g>
+  <text x="26" y="48" fill="#38BDF8" font-size="16" font-family="monospace" letter-spacing="4">PROJECT 02 // SYSTEMS</text>
+  <text x="764" y="48" fill="#818CF8" fill-opacity=".7" font-size="16" font-family="monospace" text-anchor="end">.SVG</text>
+  <text x="54" y="330" fill="#38BDF8" fill-opacity=".16" font-size="300" font-family="monospace" font-weight="700">02</text>
+  <g transform="translate(520 95)">
+    <g stroke="#38BDF8" stroke-opacity=".8" stroke-width="2">
+      <path d="M90 20 L168 65 V155 L90 200 L12 155 V65 Z"/>
+      <path d="M90 20 V200"/>
+      <path d="M12 65 L90 110 L168 65"/>
+      <path d="M12 155 L90 110 L90 200"/>
+    </g>
+    <path d="M90 20 L12 65 M90 110 L168 65" stroke="#A5C6FF" stroke-opacity=".5" stroke-width="2"/>
+    <circle cx="90" cy="20" r="6" fill="#A5C6FF"/>
+    <circle cx="12" cy="65" r="6" fill="#38BDF8"/>
+    <circle cx="168" cy="65" r="6" fill="#38BDF8"/>
+    <circle cx="90" cy="200" r="6" fill="#A5C6FF"/>
+    <circle cx="90" cy="110" r="6" fill="#38BDF8" fill-opacity=".9"/>
+  </g>
+  <circle cx="52" cy="376" r="4" fill="#38BDF8"/>
+  <circle cx="70" cy="376" r="4" fill="#38BDF8" fill-opacity=".5"/>
+  <circle cx="88" cy="376" r="4" fill="#38BDF8" fill-opacity=".25"/>
+</svg>

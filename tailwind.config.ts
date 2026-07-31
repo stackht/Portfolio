@@ -11,11 +11,11 @@ const config = {
   theme: {
     extend: {
       colors: {
-        neonBlue: "#00E5FF",
-        neonGreen: "#00FF00",
-        ink: "#050805",
-        white: "#D7FFD9",
-        black: "#040604",
+        neonBlue: "#C7A45F",
+        neonGreen: "#E0B25B",
+        ink: "#23212C",
+        white: "#EEE9E0",
+        black: "#23212C",
       },
       fontFamily: {
         orbitron: [
@@ -50,11 +50,11 @@ const config = {
         ],
       },
       boxShadow: {
-        neon: "0 0 18px rgba(0, 255, 0, 0.55), 0 0 50px rgba(0, 229, 255, 0.3)",
+        neon: "0 0 18px rgba(224, 178, 92, 0.55), 0 0 50px rgba(199, 164, 95, 0.3)",
       },
       backgroundImage: {
         "hero-radial":
-          "radial-gradient(circle at 15% 15%, rgba(0,255,0,0.22), transparent 35%), radial-gradient(circle at 80% 20%, rgba(0,229,255,0.16), transparent 40%)",
+          "radial-gradient(circle at 15% 15%, rgba(224,178,92,0.22), transparent 35%), radial-gradient(circle at 80% 20%, rgba(199,164,95,0.16), transparent 40%)",
       },
     },
   },

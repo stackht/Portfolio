@@ -37,20 +37,20 @@ export default function Lighting({ hoveredRef }: Props) {
         ref={rimRef}
         position={[6, 8, 6]}
         intensity={1.6}
-        color="#4fe0cc"
+        color="#4cc3f2"
       />
       <pointLight
         ref={fillRef}
         position={[-4, 3, 4]}
         intensity={0.6}
-        color="#d4fffb"
+        color="#8fd8ff"
       />
       <spotLight
         position={[0, 8, 4]}
         intensity={1.6}
         angle={0.4}
         penumbra={0.6}
-        color="#1d8c82"
+        color="#1f4d8a"
         castShadow
       />
       <Environment preset="night" />

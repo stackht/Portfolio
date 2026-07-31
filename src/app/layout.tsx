@@ -1,32 +1,25 @@
 import type { Metadata } from "next"
-import { Cinzel, Orbitron, Space_Grotesk } from "next/font/google"
+import localFont from "next/font/local"
+import { JetBrains_Mono } from "next/font/google"
 import "./globals.css"
-import ReduxProvider from "../components/providers/ReduxProvider"
-import PreloadModels from "../components/PreloadModels"
 import ConsoleSilencer from "../components/ConsoleSilencer"
 import PerformanceBoot from "../components/PerformanceBoot"
 
-const orbitron = Orbitron({
-  variable: "--font-orbitron",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+const deltha = localFont({
+  variable: "--font-display",
+  src: "../../DelthaRegular-GOgrm.woff",
+  weight: "400",
 })
 
-const space = Space_Grotesk({
-  variable: "--font-space",
+const jetbrains = JetBrains_Mono({
+  variable: "--font-mono",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-})
-
-const cinzel = Cinzel({
-  variable: "--font-cinzel",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "700"],
 })
 
 export const metadata: Metadata = {
-  title: "Code Medium | Technical Club",
-  description: "Code Medium: Build. Break. Innovate.",
+  title: "Hemant Thakur | Full-Stack Developer",
+  description: "Portfolio of Hemant Thakur. Full-stack developer crafting cinematic web experiences.",
 }
 
 export default function RootLayout({
@@ -37,18 +30,15 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${orbitron.variable} ${space.variable} ${cinzel.variable} h-full antialiased`}
+      className={`${deltha.variable} ${jetbrains.variable} dark h-full antialiased`}
     >
       <head>
         <meta name="color-scheme" content="dark" />
       </head>
       <body className="min-h-full bg-ink text-white">
-        <ReduxProvider>
-          <ConsoleSilencer />
-          <PerformanceBoot />
-          <PreloadModels />
-          {children}
-        </ReduxProvider>
+        <ConsoleSilencer />
+        <PerformanceBoot />
+        {children}
       </body>
     </html>
   )

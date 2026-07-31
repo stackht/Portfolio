@@ -38,7 +38,17 @@ yarn-error.log*
 
 # backend
 /backend/node_modules
+/backend/.pgdata/
+/backend/.pglog
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local extras / reference (not part of the deployed site)
+/example.html
+/style.css
+/Replit/
+/Recording*.mp4
+/public/organizers/
+
