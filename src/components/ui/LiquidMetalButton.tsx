@@ -120,7 +120,7 @@ export const LiquidMetalButton = forwardRef<HTMLButtonElement, LiquidMetalButton
             {icon && (
               <div
                 className={cn(
-                  "rounded-full flex items-center justify-center",
+                  "pf-lm-icon rounded-full flex items-center justify-center",
                   "bg-neutral-100 dark:bg-neutral-800",
                   "shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)]",
                   iconSizes[size],
