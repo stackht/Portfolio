@@ -5344,3 +5344,22 @@ body:has(.cm-access) {
     transform: scale(0.2) !important;
   }
 }
+/* Fullscreen: tighter let's talk glass */
+@media (min-width: 1101px) {
+  .pf-contact-glass {
+    padding-top: clamp(28px, 3.5vw, 44px);
+    padding-bottom: clamp(28px, 3.5vw, 44px);
+  }
+  .pf-contact h2 {
+    margin-top: 20px;
+  }
+  .pf-contact-lead {
+    margin-top: 12px;
+  }
+  .pf-contact-email-row {
+    margin-top: 20px;
+  }
+  .pf-contact-actions {
+    margin-top: 24px;
+  }
+}
