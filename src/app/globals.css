@@ -5319,7 +5319,7 @@ body:has(.cm-access) {
 @media (max-width: 480px) {
   .pf-contact-actions {
     flex-direction: row;
-    align-items: flex-start;
+    align-items: center;
     flex-wrap: nowrap;
     gap: 14px;
   }

@@ -555,7 +555,6 @@ export default function PortfolioExperience() {
                 <TypingKeyboard autoTypeText="Lets build something great together. Open to internships, research, and ambitious engineering problems. Reach out at hello dot hemant dot dev       " accentColor="#38bdf8" secondaryAccent="#818cf8" scale={0.55} />
               </div>
             </div>
-            <p className="pf-contact-note"><AsciiGlitchRipple as="span">If you&apos;re working on something hard — let&apos;s talk.</AsciiGlitchRipple></p>
           </div>
           </div>
         </section>
