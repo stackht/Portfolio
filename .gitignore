@@ -52,3 +52,10 @@ next-env.d.ts
 /Recording*.mp4
 /public/organizers/
 
+
+# agent hooks (impeccable)
+/.claude/
+/.codex/
+/.cursor/
+/.agents/
+/.gemini/
