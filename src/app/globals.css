@@ -5315,3 +5315,31 @@ body:has(.cm-access) {
 .pf-hero-bottom p {
   text-align: right;
 }
+/* Mobile only: vertical flip buttons, keyboard on the right */
+@media (max-width: 480px) {
+  .pf-contact-actions {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .pf-contact-left {
+    width: auto;
+    flex: none;
+    gap: 14px;
+  }
+  .pf-social-flip > div {
+    padding: 8px;
+  }
+  .pf-social-flip > div > .group {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .pf-contact-kb {
+    width: 170px;
+    height: 130px;
+    margin-top: 0;
+  }
+  .pf-contact-kb .tk-main {
+    transform: scale(0.2) !important;
+  }
+}
