@@ -522,11 +522,11 @@ export default function PortfolioExperience() {
               <em><AsciiGlitchRipple as="span">great.</AsciiGlitchRipple></em>
             </h2>
             <p className="pf-contact-lead"><AsciiGlitchRipple as="span">Open to internships, research, and ambitious engineering problems.</AsciiGlitchRipple></p>
+            <div className="pf-contact-email-row">
+              <a className="pf-contact-email" href={`mailto:${EMAIL}`}><AsciiGlitchRipple as="span">{EMAIL}</AsciiGlitchRipple></a>
+            </div>
             <div className="pf-contact-actions">
               <div className="pf-contact-left">
-                <div className="pf-contact-email-row">
-                  <a className="pf-contact-email" href={`mailto:${EMAIL}`}><AsciiGlitchRipple as="span">{EMAIL}</AsciiGlitchRipple></a>
-                </div>
                 <div className="pf-contact-links">
                   {[
                     { label: "GitHub", href: GITHUB_URL, external: true },

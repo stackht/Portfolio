@@ -5320,6 +5320,7 @@ body:has(.cm-access) {
   .pf-contact-actions {
     flex-direction: row;
     align-items: flex-start;
+    flex-wrap: nowrap;
     gap: 14px;
   }
   .pf-contact-left {
