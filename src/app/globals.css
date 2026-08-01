@@ -5275,3 +5275,32 @@ body:has(.cm-access) {
     display: flex;
   }
 }
+/* Hero: name left, meta + tagline right */
+.pf-hero h1 {
+  margin-left: -clamp(1rem, 2.5vw, 2.5rem);
+}
+.pf-hero-meta {
+  left: auto;
+  right: max(4vw, 24px);
+}
+.pf-hero-bottom {
+  max-width: 1000px;
+  width: 100%;
+}
+.pf-hero-bottom p {
+  order: 1;
+}
+
+@media (max-width: 900px) {
+  .pf-hero-meta {
+    display: flex;
+  }
+  .pf-hero-bottom p {
+    align-self: flex-end;
+    text-align: right;
+    max-width: 92%;
+  }
+  .pf-hero-cta-row {
+    align-self: flex-start;
+  }
+}
