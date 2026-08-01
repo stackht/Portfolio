@@ -5304,3 +5304,14 @@ body:has(.cm-access) {
     align-self: flex-start;
   }
 }
+/* Hero refinements */
+.pf-hero h1 {
+  margin-left: -clamp(2rem, 4vw, 4rem);
+}
+.pf-hero-meta {
+  align-items: flex-end;
+  text-align: right;
+}
+.pf-hero-bottom p {
+  text-align: right;
+}
