@@ -335,7 +335,7 @@ export default function PortfolioExperience() {
   }, [])
 
   useEffect(() => {
-    const lenis = new Lenis({ lerp: 0.08, smoothWheel: true, syncTouch: true })
+    const lenis = new Lenis({ lerp: 0.05, smoothWheel: true, syncTouch: true })
     let frame = 0
     const raf = (time: number) => {
       lenis.raf(time)
