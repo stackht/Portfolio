@@ -5,7 +5,8 @@ import dynamic from "next/dynamic"
 import { motion, useMotionValueEvent, useScroll, useSpring, useTransform } from "framer-motion"
 import Lenis from "lenis"
 import CursorGlow from "./CursorGlow"
-import { Github, Linkedin, FileText } from "lucide-react"
+import SocialFlipButton, { type SocialItem } from "./ui/SocialFlipButton"
+import { FaGithub, FaLinkedin, FaFileDownload } from "react-icons/fa"
 import LiquidMetalButton from "./ui/LiquidMetalButton"
 import AsciiGlitchRipple from "./ui/AsciiGlitchRipple"
 import CylinderCarousel from "./ui/CylinderCarousel"
@@ -20,6 +21,12 @@ const EMAIL = "hello@hemant.dev"
 const GITHUB_URL = "https://github.com/hemantthakur"
 const LINKEDIN_URL = "https://linkedin.com/in/hemantthakur"
 const RESUME_URL = "#"
+
+const SOCIAL_ITEMS: SocialItem[] = [
+  { letter: "G", icon: <FaGithub />, label: "GitHub", href: GITHUB_URL },
+  { letter: "L", icon: <FaLinkedin />, label: "LinkedIn", href: LINKEDIN_URL },
+  { letter: "R", icon: <FaFileDownload />, label: "Resume", onClick: () => window.location.href = RESUME_URL },
+]
 
 const tools = ["C", "C++", "Python", "Rust", "TypeScript", "React", "Next.js", "Node.js", "Three.js", "WebGL", "PostgreSQL", "Docker", "Linux", "Git"]
 
@@ -522,24 +529,26 @@ export default function PortfolioExperience() {
                 </div>
                 <div className="pf-contact-links">
                   {[
-                    { label: "GitHub", href: GITHUB_URL, external: true, icon: <Github /> },
-                    { label: "LinkedIn", href: LINKEDIN_URL, external: true, icon: <Linkedin /> },
-                    { label: "Resume", href: RESUME_URL, external: false, icon: <FileText /> },
-                  ].map(({ label, href, external, icon }) => (
+                    { label: "GitHub", href: GITHUB_URL, external: true },
+                    { label: "LinkedIn", href: LINKEDIN_URL, external: true },
+                    { label: "Resume", href: RESUME_URL, external: false },
+                  ].map(({ label, href, external }) => (
                     <LiquidMetalButton
                       key={label}
                       size="md"
                       className="px-10"
                       metalConfig={METAL}
-                      icon={icon}
                       onClick={() => {
                         if (external) window.open(href, "_blank")
                         else window.location.href = href
                       }}
                     >
-                      <span className="pf-btn-label">{label}</span>
+                      {label}
                     </LiquidMetalButton>
                   ))}
+                </div>
+                <div className="pf-social-flip">
+                  <SocialFlipButton items={SOCIAL_ITEMS} />
                 </div>
               </div>
               <div className="pf-contact-kb" aria-hidden="true">

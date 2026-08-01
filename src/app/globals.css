@@ -5262,3 +5262,16 @@ body:has(.cm-access) {
     transform: scale(0.28) !important;
   }
 }
+/* Contact social: text buttons on full windows, flip buttons on small/mobile */
+.pf-social-flip {
+  display: none;
+}
+
+@media (max-width: 1100px) {
+  .pf-contact-links {
+    display: none;
+  }
+  .pf-social-flip {
+    display: flex;
+  }
+}
