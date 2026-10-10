@@ -1,25 +1,33 @@
-import type { Metadata } from "next"
-import localFont from "next/font/local"
-import { JetBrains_Mono } from "next/font/google"
+import type { Metadata, Viewport } from "next"
+import { Funnel_Display, Funnel_Sans, Martian_Mono } from "next/font/google"
 import "./globals.css"
 import ConsoleSilencer from "../components/ConsoleSilencer"
-import PerformanceBoot from "../components/PerformanceBoot"
 
-const deltha = localFont({
+const display = Funnel_Display({
   variable: "--font-display",
-  src: "../../DelthaRegular-GOgrm.woff",
-  weight: "400",
+  subsets: ["latin"],
 })
 
-const jetbrains = JetBrains_Mono({
+const sans = Funnel_Sans({
+  variable: "--font-sans",
+  subsets: ["latin"],
+})
+
+const mono = Martian_Mono({
   variable: "--font-mono",
   subsets: ["latin"],
-  weight: ["400", "500", "700"],
+  axes: ["wdth"],
 })
 
 export const metadata: Metadata = {
-  title: "Hemant Thakur | Full-Stack Developer",
-  description: "Portfolio of Hemant Thakur. Full-stack developer crafting cinematic web experiences.",
+  title: "Hemant Thakur · Computer Engineering",
+  description:
+    "Hemant Thakur, a Computer Engineering student building across the whole stack, from bare-metal C and OS internals to machine learning and the browser.",
+}
+
+export const viewport: Viewport = {
+  themeColor: "#f3f4f6",
+  colorScheme: "light",
 }
 
 export default function RootLayout({
@@ -28,16 +36,10 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${deltha.variable} ${jetbrains.variable} dark h-full antialiased`}
-    >
-      <head>
-        <meta name="color-scheme" content="dark" />
-      </head>
-      <body className="min-h-full bg-ink text-white">
+    // Browser extensions often add attributes to <html> before React hydrates; ignore those.
+    <html lang="en" className={`${display.variable} ${sans.variable} ${mono.variable}`} suppressHydrationWarning>
+      <body>
         <ConsoleSilencer />
-        <PerformanceBoot />
         {children}
       </body>
     </html>

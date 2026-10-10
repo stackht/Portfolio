@@ -59,3 +59,8 @@ next-env.d.ts
 /.cursor/
 /.agents/
 /.gemini/
+
+# design review captures (local only)
+/.impeccable/review/
+/.impeccable/mocks/
+/.impeccable/questions/
