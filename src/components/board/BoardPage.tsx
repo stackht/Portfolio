@@ -31,6 +31,15 @@ function Hero({ onJump, reduced }: { onJump: (id: string) => void; reduced: bool
   const inView = useInView(ref)
   const gl = useWebGL()
   const [ready, setReady] = useState(false)
+  // The stage is fixed so the glass can travel up into the menu orb; it fades out as
+  // the About section takes over the screen.
+  const { scrollY } = useScroll()
+  const stageOpacity = useTransform(scrollY, (y) => {
+    if (typeof window === "undefined") return 1
+    const v = y / Math.max(1, window.innerHeight)
+    return Math.min(1, Math.max(0, 1 - (v - 0.55) / 0.35))
+  })
+  const stageVisibility = useTransform(stageOpacity, (o) => (o <= 0.001 ? "hidden" : "visible"))
 
   // Always keep an end state: reduced motion is detected after mount, and dropping
   // `animate` at that point would leave these stuck at their hidden starting style.
@@ -42,16 +51,20 @@ function Hero({ onJump, reduced }: { onJump: (id: string) => void; reduced: bool
 
   return (
     <section id="top" className="hero" ref={ref} aria-labelledby="hero-name">
-      <div className="hero-stage" data-ready={ready}>
+      <motion.div
+        className="hero-stage"
+        data-ready={ready}
+        style={{ opacity: stageOpacity, visibility: stageVisibility }}
+      >
         {/* Still glass for browsers without WebGL, and the poster while three.js loads. */}
         <div className="glass-poster" data-hidden={gl && ready} aria-hidden="true">
           <i />
         </div>
         {gl && <HeroGlass active={inView} reducedMotion={reduced} onReady={() => setReady(true)} />}
-      </div>
+      </motion.div>
       <div className="hero-shade" aria-hidden="true" />
       <div className="hero-copy">
-        <h1 id="hero-name" className="hero-name" aria-label={PERSON.name}>
+        <h1 id="hero-name" className="hero-name" aria-label={PERSON.name} data-shine={reduced ? undefined : true}>
           {PERSON.name.split(" ").map((line, i) => (
             <span key={line} className="rv-mask" aria-hidden="true">
               <motion.span
@@ -127,8 +140,18 @@ function About({ reduced }: { reduced: boolean }) {
 }
 
 function Stack({ reduced }: { reduced: boolean }) {
+  const ref = useRef<HTMLElement>(null)
+  // The cobalt band opens from a thin line to the full screen as the section arrives.
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 95%", "start 30%"] })
+  const wipe = useTransform(scrollYProgress, [0, 1], [0, 1])
   return (
-    <section id="stack" className="sec stack" aria-labelledby="stack-h">
+    <motion.section
+      ref={ref}
+      id="stack"
+      className="sec stack"
+      aria-labelledby="stack-h"
+      style={reduced ? undefined : ({ "--wipe": wipe } as unknown as React.CSSProperties)}
+    >
       <div className="stack-intro">
         <RevealHeading id="stack-h" text={ABOUT.question} reduced={reduced} via className="stack-h" />
         <Rise reduced={reduced}>
@@ -139,7 +162,7 @@ function Stack({ reduced }: { reduced: boolean }) {
         </Rise>
       </div>
       <Stackup reduced={reduced} />
-    </section>
+    </motion.section>
   )
 }
 
@@ -283,33 +306,58 @@ export default function BoardPage() {
     lenisRef.current = lenis
     // Shared with the liquid-glass lens so it re-renders in step with the smoothed scroll.
     ;(window as unknown as { __lenis?: Lenis }).__lenis = lenis
+    // Headings lean with scroll speed and settle when you stop.
+    const root = document.documentElement
+    let skew = 0
+    let target = 0
+    lenis.on("scroll", (l: Lenis) => {
+      target = Math.max(-2.5, Math.min(2.5, l.velocity * 0.09))
+    })
     let frame = 0
     const raf = (t: number) => {
       lenis.raf(t)
+      target *= 0.9
+      const next = skew + (target - skew) * 0.12
+      if (Math.abs(next - skew) > 0.002 || (skew !== 0 && Math.abs(next) < 0.002)) {
+        skew = Math.abs(next) < 0.002 ? 0 : next
+        root.style.setProperty("--skew", `${skew.toFixed(3)}deg`)
+      }
       frame = requestAnimationFrame(raf)
     }
     frame = requestAnimationFrame(raf)
     return () => {
       cancelAnimationFrame(frame)
+      root.style.removeProperty("--skew")
       lenis.destroy()
       lenisRef.current = null
       delete (window as unknown as { __lenis?: Lenis }).__lenis
     }
   }, [reduced])
 
-  const jump = useCallback((id: string) => {
-    const el = id === "top" ? document.body : document.getElementById(id)
-    if (!el) return
-    if (lenisRef.current) lenisRef.current.scrollTo(id === "top" ? 0 : el, { offset: 0, duration: 1.4 })
-    else el.scrollIntoView({ behavior: "auto" })
-    history.replaceState(null, "", id === "top" ? location.pathname : `#${id}`)
-    // Move focus with the scroll so keyboard and screen-reader users land in the section too.
-    const target = id === "top" ? document.getElementById("hero-name") : el.querySelector<HTMLElement>("h2")
-    if (target) {
-      target.setAttribute("tabindex", "-1")
-      target.focus({ preventScroll: true })
-    }
-  }, [])
+  const jump = useCallback(
+    (id: string) => {
+      const el = id === "top" ? document.body : document.getElementById(id)
+      if (!el) return
+      const lenis = lenisRef.current
+      const cut = () => {
+        if (lenis) lenis.scrollTo(id === "top" ? 0 : el, { offset: 0, immediate: true, force: true })
+        else if (id === "top") window.scrollTo(0, 0)
+        else el.scrollIntoView({ behavior: "auto" })
+      }
+      // A soft cinematic cut where the browser supports it; a smooth glide otherwise.
+      if (!reduced && "startViewTransition" in document) document.startViewTransition(cut)
+      else if (lenis) lenis.scrollTo(id === "top" ? 0 : el, { offset: 0, duration: 1.4 })
+      else cut()
+      history.replaceState(null, "", id === "top" ? location.pathname : `#${id}`)
+      // Move focus with the scroll so keyboard and screen-reader users land in the section too.
+      const target = id === "top" ? document.getElementById("hero-name") : el.querySelector<HTMLElement>("h2")
+      if (target) {
+        target.setAttribute("tabindex", "-1")
+        target.focus({ preventScroll: true })
+      }
+    },
+    [reduced],
+  )
 
   return (
     <div className="site" ref={siteRef}>
@@ -317,6 +365,10 @@ export default function BoardPage() {
         Skip to content
       </a>
       <div className="grain" aria-hidden="true" />
+      {/* Opening shot: the menu orb opens like an aperture. Pure CSS, once per session. */}
+      <div className="intro" aria-hidden="true">
+        <i className="intro-orb" />
+      </div>
       <TopNav onJump={jump} />
       <Hero onJump={jump} reduced={reduced} />
       <TraceRail containerRef={siteRef} />

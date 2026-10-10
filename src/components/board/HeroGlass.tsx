@@ -125,6 +125,22 @@ const BACKDROP_FRAG = /* glsl */ `
   uniform float uPortrait;
   varying vec2 vUv;
 
+  // Water-glass caustics: the light pattern the sculpture throws on the paper.
+  float caustic(vec2 q, float t) {
+    vec2 p = q - vec2(250.0);
+    vec2 i = p;
+    float c = 1.0;
+    float inten = 0.005;
+    for (int n = 0; n < 4; n++) {
+      float tt = t * (1.0 - 3.5 / float(n + 1));
+      i = p + vec2(cos(tt - i.x) + sin(tt + i.y), sin(tt - i.y) + cos(tt + i.x));
+      c += 1.0 / length(vec2(p.x / (sin(i.x + tt) / inten), p.y / (cos(i.y + tt) / inten)));
+    }
+    c /= 4.0;
+    c = 1.17 - pow(c, 1.4);
+    return clamp(pow(abs(c), 8.0), 0.0, 1.0);
+  }
+
   void main() {
     vec2 p = vUv * uRes;
     vec2 m = uMouse * uRes;
@@ -138,6 +154,14 @@ const BACKDROP_FRAG = /* glsl */ `
     float rHome = (uPortrait > 0.5 ? 0.55 : 0.45) * (1.0 + 0.04 * sin(uTime * 0.6));
     float pool = exp(-pow(length((vUv - home) * vec2(uRes.x / uRes.y, 1.0)) / rHome, 2.0) * 2.2);
     col = mix(col, cobalt, pool * 0.16);
+
+    // Caustics pooled around the sculpture, drifting as the glass breathes.
+    if (pool > 0.04) {
+      vec2 cq = (vUv - home) * vec2(uRes.x / uRes.y, 1.0) * 7.0;
+      float light = caustic(cq, uTime * 0.45 + 17.0);
+      col = mix(col, cobalt, light * pool * 0.32);
+      col = mix(col, vec3(1.0), light * pool * 0.35);
+    }
 
     // A second, lower pool under the copy so the left side carries light too.
     vec2 low = uPortrait > 0.5 ? vec2(0.15, 0.85) : vec2(0.14, 0.16);
@@ -357,29 +381,52 @@ function FlowLines({ animate }: { animate: boolean }) {
   return <lineSegments geometry={field.geo} material={field.material} position={[0, 0, PLANE_Z]} />
 }
 
+const smooth = (a: number, b: number, x: number) => {
+  const t = Math.min(1, Math.max(0, (x - a) / (b - a)))
+  return t * t * (3 - 2 * t)
+}
+
 function Rig({ animate, quality }: { animate: boolean; quality: "high" | "low" }) {
   const group = useRef<THREE.Group>(null)
-  const { size } = useThree()
+  const shadow = useRef<THREE.Group>(null)
+  const { size, camera } = useThree()
   const portrait = size.width / size.height < 0.9
   const intro = useRef(animate ? 0 : 1)
+  const floorY = portrait ? -3.3 : -1.75
 
   useFrame(({ pointer }, dt) => {
     const g = group.current
     if (!g) return
     intro.current = Math.min(1, intro.current + dt / 1.8)
     const e = easeOutExpo(intro.current)
-    const scroll = Math.min(1, window.scrollY / Math.max(1, window.innerHeight))
-    const k = 1 - Math.exp(-dt * 3)
-    const baseX = portrait ? 0 : 2.05
-    const baseY = portrait ? -1.9 : 0
-    const tx = baseX + (animate ? pointer.x * 0.25 : 0)
-    const ty = baseY + (animate ? pointer.y * 0.18 : 0) + scroll * 1.8
+    const scroll = window.scrollY / Math.max(1, window.innerHeight)
+    const k = 1 - Math.exp(-dt * 4)
+
+    // Where the menu orb sits, in world units on the sculpture's plane.
+    const fov = (camera as THREE.PerspectiveCamera).fov
+    const halfH = CAM_Z * Math.tan(THREE.MathUtils.degToRad(fov / 2))
+    const halfW = halfH * (size.width / size.height)
+    const phone = size.width <= 760
+    const gutter = phone ? 16 : Math.min(56, Math.max(16, size.width * 0.04))
+    const orbR = phone ? 26 : 29
+    const orbX = ((size.width - gutter - orbR) / size.width) * 2 - 1
+    const orbY = -((((phone ? 10 : 16) + orbR) / size.height) * 2 - 1)
+
+    // Scrolling out of the hero carries the glass up into the orb.
+    const fly = animate ? smooth(0.05, 0.8, scroll) : 0
+    const baseX = (portrait ? 0 : 2.05) + (animate ? pointer.x * 0.25 : 0) * (1 - fly)
+    const baseY = (portrait ? -1.9 : 0) + (animate ? pointer.y * 0.18 : 0) * (1 - fly)
+    const tx = THREE.MathUtils.lerp(baseX, orbX * halfW, fly)
+    const ty = THREE.MathUtils.lerp(baseY, orbY * halfH, fly)
     g.position.x += (tx - g.position.x) * k
     g.position.y += (ty - g.position.y) * k
-    g.rotation.x += ((animate ? -pointer.y * 0.35 : 0) + scroll * 0.6 - g.rotation.x) * k
-    g.rotation.y += ((animate ? pointer.x * 0.45 : 0) - g.rotation.y) * k
-    const s = (portrait ? 0.6 : 0.72) * (0.55 + 0.45 * e) * (1 - scroll * 0.15)
-    g.scale.setScalar(s)
+    g.rotation.x += ((animate ? -pointer.y * 0.35 : 0) * (1 - fly) - g.rotation.x) * k
+    g.rotation.y += ((animate ? pointer.x * 0.45 : 0) + fly * Math.PI * 1.5 - g.rotation.y) * k
+    const rest = (portrait ? 0.6 : 0.72) * (0.55 + 0.45 * e)
+    const orbScale = (orbR / (size.height / 2)) * halfH / 1.3
+    const target = THREE.MathUtils.lerp(rest, orbScale, fly)
+    g.scale.setScalar(g.scale.x + (target - g.scale.x) * k)
+    if (shadow.current) shadow.current.position.y = floorY - fly * 4
   })
 
   return (
@@ -389,7 +436,8 @@ function Rig({ animate, quality }: { animate: boolean; quality: "high" | "low" }
         <Backdrop animate={animate} />
       </group>
       <ContactShadows
-        position={[portrait ? 0 : 2.05, portrait ? -3.3 : -1.75, 0]}
+        ref={shadow}
+        position={[portrait ? 0 : 2.05, floorY, 0]}
         opacity={0.22}
         scale={8}
         blur={2.8}

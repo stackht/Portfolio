@@ -1,11 +1,20 @@
 "use client"
 
 import { useEffect, useRef, useState, type PointerEvent } from "react"
-import { motion } from "framer-motion"
+import { motion, useMotionValue, useScroll, useSpring, useTransform } from "framer-motion"
 import { PROJECTS } from "@/content/site"
 import { drawProjectArt, type ArtKind } from "./art"
 
 type Lens = { destroy?: () => void }
+
+const KINDS: ArtKind[] = ["flow", "lanes", "contours", "path"]
+
+const SLOTS = [
+  { cls: "slot-a", w: 760, h: 380 },
+  { cls: "slot-b", w: 520, h: 300 },
+  { cls: "slot-c", w: 560, h: 220 },
+  { cls: "slot-d", w: 760, h: 220 },
+]
 
 function ProjectArt({ seed, kind, w, h }: { seed: number; kind: ArtKind; w: number; h: number }) {
   const ref = useRef<HTMLCanvasElement>(null)
@@ -22,19 +31,70 @@ function ProjectArt({ seed, kind, w, h }: { seed: number; kind: ArtKind; w: numb
       live = false
     }
   }, [seed, kind, w, h])
-  return <canvas ref={ref} className="pcb-art" width={w * 2} height={h * 2} style={{ aspectRatio: `${w} / ${h}` }} aria-hidden="true" />
+  return <canvas ref={ref} className="pcb-art" width={w * 2} height={h * 2} aria-hidden="true" />
+}
+
+type Project = (typeof PROJECTS)[number]
+
+/** One project: tilts toward the cursor, and its art drifts slower than the card as you scroll. */
+function ProjectCard({ p, i, slot, reduced }: { p: Project; i: number; slot: (typeof SLOTS)[number]; reduced: boolean }) {
+  const ref = useRef<HTMLElement>(null)
+  const rx = useMotionValue(0)
+  const ry = useMotionValue(0)
+  const rotateX = useSpring(rx, { stiffness: 160, damping: 18 })
+  const rotateY = useSpring(ry, { stiffness: 160, damping: 18 })
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] })
+  const artY = useTransform(scrollYProgress, [0, 1], ["-7%", "7%"])
+
+  const onMove = (e: PointerEvent<HTMLElement>) => {
+    const r = e.currentTarget.getBoundingClientRect()
+    const x = e.clientX - r.left
+    const y = e.clientY - r.top
+    e.currentTarget.style.setProperty("--mx", `${x}px`)
+    e.currentTarget.style.setProperty("--my", `${y}px`)
+    if (reduced || e.pointerType !== "mouse") return
+    ry.set((x / r.width - 0.5) * 7)
+    rx.set(-(y / r.height - 0.5) * 7)
+  }
+  const onLeave = () => {
+    rx.set(0)
+    ry.set(0)
+  }
+
+  return (
+    <motion.article
+      ref={ref}
+      className={`pcb-card ${slot.cls}`}
+      onPointerMove={onMove}
+      onPointerLeave={onLeave}
+      style={reduced ? undefined : { rotateX, rotateY, transformPerspective: 1100 }}
+      initial={reduced ? false : { opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "0px 0px -8% 0px" }}
+      transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: (i % 2) * 0.12 }}
+    >
+      <div className="pcb-art-wrap" style={{ aspectRatio: `${slot.w} / ${slot.h}` }}>
+        <motion.div className="pcb-art-move" style={reduced ? undefined : { y: artY }}>
+          <ProjectArt seed={0x51 + i * 977} kind={KINDS[i % KINDS.length]} w={slot.w} h={slot.h} />
+        </motion.div>
+      </div>
+      <div className="pcb-body">
+        <h3>{p.title}</h3>
+        <p className="pcb-meta">
+          {p.domain}, {p.year}
+        </p>
+        <p className="pcb-desc">{p.desc}</p>
+        <ul className="pcb-tps" aria-label={`${p.title} highlights`}>
+          {p.points.map((pt) => (
+            <li key={pt}>{pt}</li>
+          ))}
+        </ul>
+      </div>
+    </motion.article>
+  )
 }
 
 // Art proportions per slot: the lead board is tall, the rest vary so no two cells match.
-const KINDS: ArtKind[] = ["flow", "lanes", "contours", "path"]
-
-const SLOTS = [
-  { cls: "slot-a", w: 760, h: 380 },
-  { cls: "slot-b", w: 520, h: 300 },
-  { cls: "slot-c", w: 560, h: 220 },
-  { cls: "slot-d", w: 760, h: 220 },
-]
-
 /**
  * The four projects, laid out asymmetrically, each with generated cover art. A liquidGL
  * loupe rests on the lead project and can be dragged over any of them to magnify it.
@@ -96,43 +156,11 @@ export default function ProjectPanel({ reducedMotion }: { reducedMotion: boolean
     }
   }, [reducedMotion])
 
-  // The card rim lights up under the pointer.
-  const onMove = (e: PointerEvent<HTMLElement>) => {
-    const r = e.currentTarget.getBoundingClientRect()
-    e.currentTarget.style.setProperty("--mx", `${e.clientX - r.left}px`)
-    e.currentTarget.style.setProperty("--my", `${e.clientY - r.top}px`)
-  }
-
   return (
     <div className="work-panel" ref={panelRef} data-glass={glass}>
-      {PROJECTS.map((p, i) => {
-        const slot = SLOTS[i % SLOTS.length]
-        return (
-          <motion.article
-            key={p.id}
-            className={`pcb-card ${slot.cls}`}
-            onPointerMove={onMove}
-            initial={reducedMotion ? false : { opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "0px 0px -8% 0px" }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: (i % 2) * 0.12 }}
-          >
-            <ProjectArt seed={0x51 + i * 977} kind={KINDS[i % KINDS.length]} w={slot.w} h={slot.h} />
-            <div className="pcb-body">
-              <h3>{p.title}</h3>
-              <p className="pcb-meta">
-                {p.domain}, {p.year}
-              </p>
-              <p className="pcb-desc">{p.desc}</p>
-              <ul className="pcb-tps" aria-label={`${p.title} highlights`}>
-                {p.points.map((pt) => (
-                  <li key={pt}>{pt}</li>
-                ))}
-              </ul>
-            </div>
-          </motion.article>
-        )
-      })}
+      {PROJECTS.map((p, i) => (
+        <ProjectCard key={p.id} p={p} i={i} slot={SLOTS[i % SLOTS.length]} reduced={reducedMotion} />
+      ))}
       <div className="loupe" aria-hidden="true">
         <div className="loupe-content" />
       </div>

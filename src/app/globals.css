@@ -855,16 +855,16 @@ p {
 .pcb-card:hover .pcb-art {
   transform: scale(1.03);
 }
-.slot-a .pcb-art {
+.slot-a .pcb-art-wrap {
   flex: 1 1 auto;
   min-height: 0;
   height: 100%;
   aspect-ratio: auto !important;
-  object-fit: cover;
 }
-.slot-d .pcb-art {
+.slot-d .pcb-art-wrap {
   height: 100%;
-  object-fit: cover;
+  min-height: 180px;
+  aspect-ratio: auto !important;
 }
 .pcb-body {
   position: relative;
@@ -1214,9 +1214,15 @@ p {
   .slot-d {
     display: flex !important;
   }
-  .slot-a .pcb-art {
+  .slot-a .pcb-art-wrap {
+    flex: none;
     height: auto;
     aspect-ratio: 760 / 380 !important;
+  }
+  .slot-d .pcb-art-wrap {
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 760 / 220 !important;
   }
   .analyser {
     --chw: 3rem;
@@ -1295,6 +1301,189 @@ p {
   }
 }
 
+
+/* ─────────────────────────────── Cinema ─────────────────────────────── */
+
+/* Opening shot: the screen starts dark and the menu orb opens like an aperture. */
+@property --ap {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+.intro {
+  --ax: calc(100% - var(--gutter) - 29px);
+  --ay: 45px;
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  pointer-events: none;
+  background: #0b0e14;
+  -webkit-mask: radial-gradient(circle at var(--ax) var(--ay), transparent var(--ap), #000 calc(var(--ap) + 1px));
+  mask: radial-gradient(circle at var(--ax) var(--ay), transparent var(--ap), #000 calc(var(--ap) + 1px));
+  animation:
+    aperture 1.3s cubic-bezier(0.7, 0, 0.2, 1) 0.6s forwards,
+    intro-gone 0s linear 2s forwards;
+}
+.intro-orb {
+  position: absolute;
+  left: var(--ax);
+  top: var(--ay);
+  width: 58px;
+  height: 58px;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 28%, #fff 0 10%, transparent 26%),
+    radial-gradient(circle at 50% 55%, var(--accent-hi), var(--accent-lo) 70%, #0b1550);
+  box-shadow: 0 0 40px 6px rgb(43 80 255 / 0.55);
+  animation: intro-orb 0.55s var(--ease-out) both;
+}
+@keyframes aperture {
+  to {
+    --ap: 170vmax;
+  }
+}
+@keyframes intro-gone {
+  to {
+    visibility: hidden;
+  }
+}
+@keyframes intro-orb {
+  from {
+    opacity: 0;
+    scale: 0.4;
+  }
+}
+html[data-intro="skip"] .intro {
+  display: none;
+}
+@media (max-width: 760px) {
+  .intro {
+    --ax: calc(100% - 16px - 26px);
+    --ay: 36px;
+  }
+  .intro-orb {
+    width: 52px;
+    height: 52px;
+  }
+}
+
+/* The hero stage stays put while the glass flies up into the orb. */
+.hero-stage {
+  position: fixed !important;
+  pointer-events: none;
+}
+
+/* Headings lean with scroll speed; the variable is driven from Lenis' velocity. */
+.sec h2,
+.contact h2 {
+  transform: skewY(var(--skew, 0deg));
+  transform-origin: 0 50%;
+  will-change: transform;
+}
+
+/* One band of light crosses each heading after its words rise. */
+.sec h2,
+.contact h2,
+.hero-name {
+  position: relative;
+}
+[data-shine]::after {
+  content: "";
+  position: absolute;
+  inset: -0.1em -0.3em;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 38%, rgb(255 255 255 / 0.9) 50%, transparent 62%) no-repeat;
+  background-size: 250% 100%;
+  background-position: 130% 0;
+  opacity: 0;
+  animation: shine 1.4s var(--ease-out) 0.55s;
+}
+.hero-name[data-shine]::after {
+  animation-delay: 1.25s;
+}
+@keyframes shine {
+  0% {
+    opacity: 1;
+    background-position: 130% 0;
+  }
+  100% {
+    opacity: 1;
+    background-position: -30% 0;
+  }
+}
+
+/* The cobalt band opens from a line to the full screen; text turns white with it. */
+.stack::before {
+  clip-path: inset(calc((1 - var(--wipe, 1)) * 50%) 0 round calc((1 - var(--wipe, 1)) * 48px));
+}
+.stack,
+.stack .stack-h,
+.stack-lead {
+  color: color-mix(in srgb, var(--on-accent) calc(var(--wipe, 1) * 100%), var(--ink));
+}
+
+/* Project art sits on its own layer so it can drift slower than the card. */
+.pcb-art-wrap {
+  position: relative;
+  overflow: hidden;
+  flex: none;
+}
+.pcb-art-move {
+  position: absolute;
+  inset: -8% 0;
+}
+.pcb-art-move .pcb-art {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  aspect-ratio: auto !important;
+}
+.pcb-card {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* Cinematic cuts between sections (View Transitions). */
+::view-transition-old(root) {
+  animation: cut-out 0.5s var(--ease-out) both;
+}
+::view-transition-new(root) {
+  animation: cut-in 0.75s var(--ease-out) both;
+}
+@keyframes cut-out {
+  to {
+    opacity: 0;
+    transform: scale(0.97);
+    filter: blur(8px);
+  }
+}
+@keyframes cut-in {
+  from {
+    opacity: 0;
+    transform: scale(1.03);
+    filter: blur(8px);
+  }
+}
+.brand {
+  view-transition-name: brand;
+}
+.orb-dock {
+  view-transition-name: orb;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro {
+    display: none;
+  }
+  .sec h2,
+  .contact h2 {
+    transform: none;
+  }
+  [data-shine]::after {
+    display: none;
+  }
+}
 
 /* ─────────────────────── One screen per section ───────────────────────
    On screens with room for it, every section is exactly one viewport tall and
@@ -1398,12 +1587,11 @@ p {
   .pcb-card {
     min-height: 0;
   }
-  .pcb-card .pcb-art {
+  .pcb-card .pcb-art-wrap {
     flex: 1 1 auto;
     min-height: 0;
     height: 100%;
     aspect-ratio: auto !important;
-    object-fit: cover;
   }
   .pcb-body {
     flex: none;

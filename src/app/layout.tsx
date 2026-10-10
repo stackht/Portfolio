@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next"
 import { Funnel_Display, Funnel_Sans, Martian_Mono } from "next/font/google"
+import Script from "next/script"
 import "./globals.css"
 import ConsoleSilencer from "../components/ConsoleSilencer"
 
@@ -42,6 +43,10 @@ export default function RootLayout({
     // Browser extensions often add attributes to <html> before React hydrates; ignore those.
     <html lang="en" className={`${display.variable} ${sans.variable} ${mono.variable}`} suppressHydrationWarning>
       <body>
+        {/* Decide before hydration whether the opening shot plays (once per session). */}
+        <Script id="intro-gate" strategy="beforeInteractive">
+          {"try{if(sessionStorage.getItem('ht-intro'))document.documentElement.dataset.intro='skip';else sessionStorage.setItem('ht-intro','1')}catch(e){document.documentElement.dataset.intro='skip'}"}
+        </Script>
         <ConsoleSilencer />
         {children}
       </body>

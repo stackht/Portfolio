@@ -1,6 +1,6 @@
 "use client"
 
-import { Fragment, useRef, type ReactNode, type PointerEvent } from "react"
+import { Fragment, useRef, useState, type ReactNode, type PointerEvent } from "react"
 import { motion, useMotionValue, useScroll, useSpring, useTransform, type MotionValue } from "framer-motion"
 
 const EASE = [0.16, 1, 0.3, 1] as const
@@ -23,6 +23,8 @@ export function RevealHeading({
 }) {
   const Tag = as === "h1" ? motion.h1 : motion.h2
   const words = text.split(" ")
+  // A single band of light crosses the heading once its words have risen.
+  const [shine, setShine] = useState(false)
   return (
     <Tag
       id={id}
@@ -31,6 +33,8 @@ export function RevealHeading({
       initial={reduced ? false : "hidden"}
       whileInView="shown"
       viewport={{ once: true, margin: "0px 0px -12% 0px" }}
+      onViewportEnter={() => !reduced && setShine(true)}
+      data-shine={shine || undefined}
       aria-label={text}
     >
       {words.map((w, i) => (
