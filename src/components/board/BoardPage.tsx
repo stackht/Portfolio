@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import dynamic from "next/dynamic"
 import Lenis from "lenis"
-import { motion, useScroll, useTransform } from "framer-motion"
+import { motion, useMotionValueEvent, useTransform } from "framer-motion"
 import {
   ArrowUpRight,
   Check,
@@ -14,7 +14,7 @@ import {
   LinkedinLogo,
 } from "@phosphor-icons/react"
 import { ABOUT, EXPERIENCE, LINKS, PERSON } from "@/content/site"
-import { useInView, useReducedMotion, useWebGL } from "./hooks"
+import { useElementProgress, useInView, useIntroSkipped, useReducedMotion, useSharedScrollY, useWebGL } from "./hooks"
 import TopNav from "./TopNav"
 import TraceRail from "./TraceRail"
 import ProjectPanel from "./ProjectPanel"
@@ -31,21 +31,46 @@ function Hero({ onJump, reduced }: { onJump: (id: string) => void; reduced: bool
   const inView = useInView(ref)
   const gl = useWebGL()
   const [ready, setReady] = useState(false)
+  // Boot sequence: the glass appears alone on the backdrop, then glides aside as the
+  // copy and chrome arrive. Skipped on repeat visits, reduced motion and without WebGL.
+  const skipped = useIntroSkipped()
+  const instant = reduced || gl === false || skipped
+  const [booted, setBooted] = useState(false)
+  const revealed = instant || booted
+
+  useEffect(() => {
+    document.documentElement.dataset.boot = revealed ? "done" : "hold"
+    if (revealed) return
+    const html = document.documentElement
+    const lenis = (window as unknown as { __lenis?: { stop?: () => void; start?: () => void } }).__lenis
+    html.style.overflow = "hidden"
+    lenis?.stop?.()
+    // Never hold the page hostage if the scene is slow to compile.
+    const bail = setTimeout(() => setBooted(true), 6000)
+    return () => {
+      clearTimeout(bail)
+      html.style.overflow = ""
+      lenis?.start?.()
+    }
+  }, [revealed])
   // The stage is fixed so the glass can travel up into the menu orb; it fades out as
   // the About section takes over the screen.
-  const { scrollY } = useScroll()
+  const scrollY = useSharedScrollY()
   const stageOpacity = useTransform(scrollY, (y) => {
     if (typeof window === "undefined") return 1
     const v = y / Math.max(1, window.innerHeight)
     return Math.min(1, Math.max(0, 1 - (v - 0.55) / 0.35))
   })
   const stageVisibility = useTransform(stageOpacity, (o) => (o <= 0.001 ? "hidden" : "visible"))
+  // Pause the 3D loop as soon as the stage has faded out, not when the hero leaves the page.
+  const [stageOn, setStageOn] = useState(true)
+  useMotionValueEvent(stageVisibility, "change", (v) => setStageOn(v === "visible"))
 
   // Always keep an end state: reduced motion is detected after mount, and dropping
   // `animate` at that point would leave these stuck at their hidden starting style.
   const intro = (i: number) => ({
     initial: { opacity: 0, y: 24 },
-    animate: { opacity: 1, y: 0 },
+    animate: revealed ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 },
     transition: reduced ? { duration: 0 } : { duration: 1, ease: EASE, delay: 0.55 + i * 0.1 },
   })
 
@@ -60,17 +85,28 @@ function Hero({ onJump, reduced }: { onJump: (id: string) => void; reduced: bool
         <div className="glass-poster" data-hidden={gl !== false} aria-hidden="true">
           <i />
         </div>
-        {gl && <HeroGlass active={inView} reducedMotion={reduced} onReady={() => setReady(true)} />}
+        {gl && (
+          <HeroGlass
+            active={inView && stageOn}
+            reducedMotion={reduced}
+            staged={!revealed}
+            onReady={() => {
+              setReady(true)
+              // Let the glass hold the stage for a beat before the rest arrives.
+              if (!instant) setTimeout(() => setBooted(true), 1600)
+            }}
+          />
+        )}
       </motion.div>
       <div className="hero-shade" aria-hidden="true" />
       <div className="hero-copy">
-        <h1 id="hero-name" className="hero-name" aria-label={PERSON.name} data-shine={reduced ? undefined : true}>
+        <h1 id="hero-name" className="hero-name" aria-label={PERSON.name} data-shine={revealed && !reduced ? true : undefined}>
           {PERSON.name.split(" ").map((line, i) => (
             <span key={line} className="rv-mask" aria-hidden="true">
               <motion.span
                 className="rv-word"
                 initial={reduced ? false : { y: "108%" }}
-                animate={{ y: "0%" }}
+                animate={{ y: revealed ? "0%" : "108%" }}
                 transition={{ duration: 1.1, ease: EASE, delay: 0.15 + i * 0.12 }}
               >
                 {line}
@@ -142,7 +178,7 @@ function About({ reduced }: { reduced: boolean }) {
 function Stack({ reduced }: { reduced: boolean }) {
   const ref = useRef<HTMLElement>(null)
   // The cobalt band opens from a thin line to the full screen as the section arrives.
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 100%", "start 65%"] })
+  const scrollYProgress = useElementProgress(ref, [[0, 1], [0, 0.65]])
   const wipe = useTransform(scrollYProgress, [0, 1], [0, 1])
   return (
     <motion.section
@@ -171,7 +207,10 @@ function Work({ reduced }: { reduced: boolean }) {
     <section id="work" className="sec work" aria-labelledby="work-h">
       <RevealHeading id="work-h" text="Built to matter." reduced={reduced} via />
       <Rise reduced={reduced}>
-        <p className="sec-lead">Four projects, each with its own generated cover. Drag the glass lens over any of them to look closer.</p>
+        <p className="sec-lead">
+          Four projects, each with its own generated cover.
+          <span className="lens-hint"> Drag the glass lens over any of them to look closer.</span>
+        </p>
       </Rise>
       <ProjectPanel reducedMotion={reduced} />
     </section>
@@ -180,7 +219,7 @@ function Work({ reduced }: { reduced: boolean }) {
 
 function Log({ reduced }: { reduced: boolean }) {
   const ref = useRef<HTMLDivElement>(null)
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 70%", "end 45%"] })
+  const scrollYProgress = useElementProgress(ref, [[0, 0.7], [1, 0.45]])
   const cursor = useTransform(scrollYProgress, [0, 1], ["0%", "100%"])
   const n = EXPERIENCE.length
   return (
@@ -307,7 +346,11 @@ export default function BoardPage() {
     // Shared with the liquid-glass lens so it re-renders in step with the smoothed scroll.
     ;(window as unknown as { __lenis?: Lenis }).__lenis = lenis
     // Headings lean with scroll speed and settle when you stop.
-    const root = document.documentElement
+    // Written straight onto the headings: a custom property on <html> would restyle the
+    // whole document on every frame.
+    const heads = [...document.querySelectorAll<HTMLElement>(".sec h2, .contact h2")]
+    const setSkew = (v: string | null) =>
+      heads.forEach((h) => (v === null ? h.style.removeProperty("--skew") : h.style.setProperty("--skew", v)))
     let skew = 0
     let target = 0
     lenis.on("scroll", (l: Lenis) => {
@@ -320,14 +363,14 @@ export default function BoardPage() {
       const next = skew + (target - skew) * 0.12
       if (Math.abs(next - skew) > 0.002 || (skew !== 0 && Math.abs(next) < 0.002)) {
         skew = Math.abs(next) < 0.002 ? 0 : next
-        root.style.setProperty("--skew", `${skew.toFixed(3)}deg`)
+        setSkew(skew === 0 ? null : `${skew.toFixed(3)}deg`)
       }
       frame = requestAnimationFrame(raf)
     }
     frame = requestAnimationFrame(raf)
     return () => {
       cancelAnimationFrame(frame)
-      root.style.removeProperty("--skew")
+      setSkew(null)
       lenis.destroy()
       lenisRef.current = null
       delete (window as unknown as { __lenis?: Lenis }).__lenis
@@ -365,10 +408,6 @@ export default function BoardPage() {
         Skip to content
       </a>
       <div className="grain" aria-hidden="true" />
-      {/* Opening shot: the menu orb opens like an aperture. Pure CSS, once per session. */}
-      <div className="intro" aria-hidden="true">
-        <i className="intro-orb" />
-      </div>
       <TopNav onJump={jump} />
       <Hero onJump={jump} reduced={reduced} />
       <TraceRail containerRef={siteRef} />

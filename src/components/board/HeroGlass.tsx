@@ -41,7 +41,8 @@ function createForm(detail: number) {
 
 function GlassForm({ animate, quality }: { animate: boolean; quality: "high" | "low" }) {
   const mesh = useRef<THREE.Mesh>(null)
-  const form = useMemo(() => createForm(quality === "high" ? 30 : 18), [quality])
+  const form = useMemo(() => createForm(quality === "high" ? 22 : 8), [quality])
+  const tick = useRef(0)
   useEffect(() => {
     form.update(1.2)
     return () => form.dispose()
@@ -49,6 +50,9 @@ function GlassForm({ animate, quality }: { animate: boolean; quality: "high" | "
 
   useFrame(({ clock }) => {
     if (!animate) return
+    // Phones morph the glass at 30 Hz; recomputing normals is the costly part.
+    tick.current += 1
+    if (quality === "low" && tick.current % 2) return
     form.update(clock.elapsedTime)
     if (mesh.current) mesh.current.rotation.y = clock.elapsedTime * 0.12
   })
@@ -56,9 +60,9 @@ function GlassForm({ animate, quality }: { animate: boolean; quality: "high" | "
   return (
     <mesh ref={mesh} geometry={form.geo}>
       <MeshTransmissionMaterial
-        samples={quality === "high" ? 8 : 4}
-        resolution={quality === "high" ? 768 : 384}
-        backside
+        samples={quality === "high" ? 6 : 2}
+        resolution={quality === "high" ? 512 : 192}
+        backside={quality === "high"}
         backsideThickness={0.4}
         thickness={0.9}
         roughness={0.04}
@@ -285,8 +289,8 @@ function createFlowField(width: number, height: number, portrait: boolean) {
   const colors: number[] = []
   const index: number[] = []
   const tmp = new THREE.Color()
-  const steps = 70
-  const count = portrait ? 90 : 150
+  const steps = 56
+  const count = portrait ? 45 : 120
   for (let i = 0; i < count; i++) {
     let x = (rnd() - 0.5) * width * 1.1
     let y = (rnd() - 0.5) * height * 1.1
@@ -302,8 +306,8 @@ function createFlowField(width: number, height: number, portrait: boolean) {
       colors.push(tmp.r, tmp.g, tmp.b)
       if (k > 0) index.push(start + k - 1, start + k)
       const a = noise(x * 0.32 + 40, y * 0.32 + 40) * Math.PI * 2
-      x += Math.cos(a) * 0.06
-      y += Math.sin(a) * 0.06
+      x += Math.cos(a) * 0.075
+      y += Math.sin(a) * 0.075
     }
   }
   const restArr = Float32Array.from(rest)
@@ -401,7 +405,7 @@ function ReadySignal({ onReady }: { onReady?: () => void }) {
   return null
 }
 
-function Rig({ animate, quality }: { animate: boolean; quality: "high" | "low" }) {
+function Rig({ animate, quality, staged }: { animate: boolean; quality: "high" | "low"; staged: boolean }) {
   const group = useRef<THREE.Group>(null)
   const shadow = useRef<THREE.Group>(null)
   const { size, camera } = useThree()
@@ -409,13 +413,18 @@ function Rig({ animate, quality }: { animate: boolean; quality: "high" | "low" }
   const intro = useRef(animate ? 0 : 1)
   const floorY = portrait ? -3.3 : -1.75
 
-  useFrame(({ pointer }, dt) => {
+  const releasedAt = useRef<number | null>(null)
+
+  useFrame(({ pointer, clock }, dt) => {
     const g = group.current
     if (!g) return
+    if (!staged && releasedAt.current === null) releasedAt.current = clock.elapsedTime
     intro.current = Math.min(1, intro.current + dt / 1.8)
     const e = easeOutExpo(intro.current)
     const scroll = window.scrollY / Math.max(1, window.innerHeight)
-    const k = 1 - Math.exp(-dt * 4)
+    // A slower, filmic glide for the move from centre stage to the side.
+    const gliding = releasedAt.current !== null && clock.elapsedTime - releasedAt.current < 2
+    const k = 1 - Math.exp(-dt * (staged ? 3 : gliding ? 1.8 : 4))
 
     // Where the menu orb sits, in world units on the sculpture's plane.
     const fov = (camera as THREE.PerspectiveCamera).fov
@@ -429,15 +438,17 @@ function Rig({ animate, quality }: { animate: boolean; quality: "high" | "low" }
 
     // Scrolling out of the hero carries the glass up into the orb.
     const fly = animate ? smooth(0.05, 0.8, scroll) : 0
-    const baseX = (portrait ? 0 : 2.05) + (animate ? pointer.x * 0.25 : 0) * (1 - fly)
-    const baseY = (portrait ? -1.9 : 0) + (animate ? pointer.y * 0.18 : 0) * (1 - fly)
+    const homeX = staged ? 0 : portrait ? 0 : 2.05
+    const homeY = staged ? (portrait ? 0.15 : 0) : portrait ? -1.9 : 0
+    const baseX = homeX + (animate ? pointer.x * 0.25 : 0) * (1 - fly)
+    const baseY = homeY + (animate ? pointer.y * 0.18 : 0) * (1 - fly)
     const tx = THREE.MathUtils.lerp(baseX, orbX * halfW, fly)
     const ty = THREE.MathUtils.lerp(baseY, orbY * halfH, fly)
     g.position.x += (tx - g.position.x) * k
     g.position.y += (ty - g.position.y) * k
     g.rotation.x += ((animate ? -pointer.y * 0.35 : 0) * (1 - fly) - g.rotation.x) * k
     g.rotation.y += ((animate ? pointer.x * 0.45 : 0) + fly * Math.PI * 1.5 - g.rotation.y) * k
-    const rest = (portrait ? 0.6 : 0.72) * (0.55 + 0.45 * e)
+    const rest = (staged ? (portrait ? 0.82 : 0.95) : portrait ? 0.6 : 0.72) * (0.55 + 0.45 * e)
     const orbScale = (orbR / (size.height / 2)) * halfH / 1.3
     const target = THREE.MathUtils.lerp(rest, orbScale, fly)
     g.scale.setScalar(g.scale.x + (target - g.scale.x) * k)
@@ -450,17 +461,17 @@ function Rig({ animate, quality }: { animate: boolean; quality: "high" | "low" }
         <GlassForm animate={animate} quality={quality} />
         <Backdrop animate={animate} />
       </group>
-      <ContactShadows
+      {quality === "high" && <ContactShadows
         ref={shadow}
         position={[portrait ? 0 : 2.05, floorY, 0]}
         opacity={0.22}
         scale={8}
         blur={2.8}
         far={4}
-        resolution={256}
+        resolution={128}
         color="#1c2a66"
         frames={animate ? Infinity : 1}
-      />
+      />}
     </>
   )
 }
@@ -468,10 +479,13 @@ function Rig({ animate, quality }: { animate: boolean; quality: "high" | "low" }
 export default function HeroGlass({
   active,
   reducedMotion,
+  staged = false,
   onReady,
 }: {
   active: boolean
   reducedMotion: boolean
+  /** Boot sequence: hold the glass centre-stage until the rest of the page arrives. */
+  staged?: boolean
   onReady?: () => void
 }) {
   // Phones start on the lighter glass; PerformanceMonitor can still step desktops down.
@@ -484,7 +498,7 @@ export default function HeroGlass({
       // Listen on the whole hero so the lines still react under the headline and buttons.
       eventSource={document.getElementById("top") ?? undefined}
       eventPrefix="client"
-      dpr={[1, quality === "high" ? 1.75 : 1.25]}
+      dpr={[1, quality === "high" ? 1.5 : 1]}
       frameloop={active ? "always" : "never"}
       camera={{ fov: 30, near: 0.1, far: 40, position: [0, 0, CAM_Z] }}
       gl={{ antialias: true, powerPreference: "high-performance" }}
@@ -508,7 +522,7 @@ export default function HeroGlass({
       <ReadySignal onReady={onReady} />
       <InteractiveBackdrop animate={!reducedMotion} />
       <FlowLines animate={!reducedMotion} />
-      <Rig animate={!reducedMotion} quality={quality} />
+      <Rig animate={!reducedMotion} quality={quality} staged={staged} />
     </Canvas>
   )
 }

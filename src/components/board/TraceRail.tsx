@@ -1,7 +1,8 @@
 "use client"
 
 import { useEffect, useRef, useState, type RefObject } from "react"
-import { motion, useMotionValueEvent, useScroll, useSpring } from "framer-motion"
+import { motion, useMotionValueEvent, useSpring } from "framer-motion"
+import { useElementProgress } from "./hooks"
 import { NAV } from "@/content/site"
 
 type Geo = { d: string; w: number; h: number; vias: { y: number; x: number; ref: string }[]; labels: boolean }
@@ -71,20 +72,43 @@ export default function TraceRail({ containerRef }: { containerRef: RefObject<HT
     }
   }, [containerRef])
 
-  const { scrollYProgress } = useScroll({ target: containerRef, offset: ["start start", "end end"] })
+  const scrollYProgress = useElementProgress(containerRef, [[0, 0], [1, 1]])
   const progress = useSpring(scrollYProgress, { stiffness: 120, damping: 30, restDelta: 0.0005 })
 
-  useMotionValueEvent(progress, "change", (v) => {
+  // Sample the path once per layout; measuring SVG geometry on every scroll frame is
+  // the single most expensive thing a phone can do here.
+  const samples = useRef<{ x: Float32Array; y: Float32Array } | null>(null)
+  useEffect(() => {
     const path = litPath.current
     if (!path || !geo) return
     const len = path.getTotalLength()
-    const p = path.getPointAtLength(Math.max(0, Math.min(1, v)) * len)
-    head.current?.setAttribute("transform", `translate(${p.x} ${p.y})`)
+    const n = Math.max(2, Math.ceil(len / 6))
+    const x = new Float32Array(n)
+    const y = new Float32Array(n)
+    for (let i = 0; i < n; i++) {
+      const pt = path.getPointAtLength((i / (n - 1)) * len)
+      x[i] = pt.x
+      y[i] = pt.y
+    }
+    samples.current = { x, y }
+  }, [geo])
+
+  const litRef = useRef(-1)
+  useMotionValueEvent(progress, "change", (v) => {
+    const s = samples.current
+    if (!s || !geo) return
+    const i = Math.round(Math.max(0, Math.min(1, v)) * (s.x.length - 1))
+    const px = s.x[i]
+    const py = s.y[i]
+    head.current?.setAttribute("transform", `translate(${px} ${py})`)
     let n = -1
-    geo.vias.forEach((via, i) => {
-      if (p.y >= via.y - 2) n = i
+    geo.vias.forEach((via, k) => {
+      if (py >= via.y - 2) n = k
     })
-    setLit(n)
+    if (n !== litRef.current) {
+      litRef.current = n
+      setLit(n)
+    }
   })
 
   return (

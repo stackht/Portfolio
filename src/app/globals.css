@@ -137,7 +137,7 @@ p {
 /* Paper grain, very faint, so the white reads as a surface rather than a screen. */
 .grain {
   position: fixed;
-  inset: -50%;
+  inset: 0;
   z-index: 60;
   pointer-events: none;
   opacity: 0.03;
@@ -617,6 +617,10 @@ p {
 
 /* ─────────────────────────────── About ─────────────────────────────── */
 
+.lit-word {
+  transition: opacity 0.45s var(--ease-out);
+}
+
 .about-statement {
   max-width: 24em;
   margin-top: calc(var(--g) * 5);
@@ -944,6 +948,11 @@ p {
   border-radius: 50%;
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.9);
   pointer-events: none;
+}
+@media (pointer: coarse) {
+  .lens-hint {
+    display: none;
+  }
 }
 .work-panel[data-glass="pending"] .loupe,
 .work-panel[data-glass="plain"] .loupe {
@@ -1311,67 +1320,19 @@ p {
 
 /* ─────────────────────────────── Cinema ─────────────────────────────── */
 
-/* Opening shot: the screen starts dark and the menu orb opens like an aperture. */
-@property --ap {
-  syntax: "<length>";
-  inherits: false;
-  initial-value: 0px;
+/* Boot sequence: until the glass has had the stage, the chrome stays hidden. */
+.brand,
+.orb-dock,
+.trace-rail {
+  transition: opacity 0.9s var(--ease-out) 0.5s;
 }
-.intro {
-  --ax: calc(100% - var(--gutter) - 29px);
-  --ay: 45px;
-  position: fixed;
-  inset: 0;
-  z-index: 95;
+html:not([data-intro="skip"]):not([data-boot="done"]) :is(.brand, .orb-dock, .trace-rail) {
+  opacity: 0;
   pointer-events: none;
-  background: #0b0e14;
-  -webkit-mask: radial-gradient(circle at var(--ax) var(--ay), transparent var(--ap), #000 calc(var(--ap) + 1px));
-  mask: radial-gradient(circle at var(--ax) var(--ay), transparent var(--ap), #000 calc(var(--ap) + 1px));
-  animation:
-    aperture 1.3s cubic-bezier(0.7, 0, 0.2, 1) 0.6s forwards,
-    intro-gone 0s linear 2s forwards;
 }
-.intro-orb {
-  position: absolute;
-  left: var(--ax);
-  top: var(--ay);
-  width: 58px;
-  height: 58px;
-  translate: -50% -50%;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 32% 28%, #fff 0 10%, transparent 26%),
-    radial-gradient(circle at 50% 55%, var(--accent-hi), var(--accent-lo) 70%, #0b1550);
-  box-shadow: 0 0 40px 6px rgb(43 80 255 / 0.55);
-  animation: intro-orb 0.55s var(--ease-out) both;
-}
-@keyframes aperture {
-  to {
-    --ap: 170vmax;
-  }
-}
-@keyframes intro-gone {
-  to {
-    visibility: hidden;
-  }
-}
-@keyframes intro-orb {
-  from {
-    opacity: 0;
-    scale: 0.4;
-  }
-}
-html[data-intro="skip"] .intro {
-  display: none;
-}
-@media (max-width: 760px) {
-  .intro {
-    --ax: calc(100% - 16px - 26px);
-    --ay: 36px;
-  }
-  .intro-orb {
-    width: 52px;
-    height: 52px;
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-boot="done"]) :is(.brand, .orb-dock, .trace-rail) {
+    opacity: 1;
   }
 }
 
@@ -1480,9 +1441,6 @@ html[data-intro="skip"] .intro {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .intro {
-    display: none;
-  }
   .sec h2,
   .contact h2 {
     transform: none;
@@ -1697,6 +1655,30 @@ html[data-intro="skip"] .intro {
   .link-detail {
     font-size: 0.875rem;
     text-align: right;
+  }
+}
+
+/* Phones: live backdrop blur is re-rendered every frame while things move or scroll,
+   so moving/fixed glass becomes a solid translucent fill there. */
+@media (max-width: 760px), (pointer: coarse) {
+  .slab {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: color-mix(in srgb, rgb(255 255 255 / 0.16) calc(var(--wipe, 1) * 100%), rgb(255 255 255 / 0.9));
+  }
+  .brand,
+  .orb-capsule {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgb(255 255 255 / 0.9);
+  }
+  .orb-glass {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .pcb-card {
+    will-change: auto;
+    transform-style: flat;
   }
 }
 

@@ -1,6 +1,7 @@
 "use client"
 
-import { useEffect, useState, useSyncExternalStore, type RefObject } from "react"
+import { useEffect, useRef, useState, useSyncExternalStore, type RefObject } from "react"
+import { motionValue, useTransform, type MotionValue } from "framer-motion"
 
 export function useReducedMotion() {
   const [reduced, setReduced] = useState(false)
@@ -82,4 +83,68 @@ export function useSeenOnce(ref: RefObject<Element | null>, rootMargin = "0px") 
     return () => io.disconnect()
   }, [ref, rootMargin])
   return seen
+}
+
+const introSkipped = () => document.documentElement.dataset.intro === "skip"
+
+/** True when the boot sequence already played this session (set before paint in layout.tsx). */
+export function useIntroSkipped() {
+  return useSyncExternalStore(noop, introSkipped, () => false)
+}
+
+// One scroll listener for the whole page. framer's useScroll() creates a tracker (and a
+// measurement pass) per call; with several scroll-driven effects that adds up on phones.
+const sharedScrollY = motionValue(0)
+let scrollUsers = 0
+const onScroll = () => sharedScrollY.set(window.scrollY)
+
+/** The page's vertical scroll position as a single shared MotionValue. */
+export function useSharedScrollY(): MotionValue<number> {
+  useEffect(() => {
+    if (scrollUsers++ === 0) {
+      onScroll()
+      window.addEventListener("scroll", onScroll, { passive: true })
+    }
+    return () => {
+      if (--scrollUsers === 0) window.removeEventListener("scroll", onScroll)
+    }
+  }, [])
+  return sharedScrollY
+}
+
+/** [element edge (0 = start, 1 = end), viewport line (0 = top, 1 = bottom)], like framer's "start 85%". */
+type Edge = readonly [number, number]
+
+/**
+ * Scroll progress (0..1) of an element between two edge/viewport crossings. Same idea as
+ * framer's `useScroll({ target, offset })`, but the element is measured only on resize,
+ * not on every scroll frame, which is what keeps phones smooth.
+ */
+export function useElementProgress(ref: RefObject<Element | null>, [a, b]: readonly [Edge, Edge]): MotionValue<number> {
+  const scrollY = useSharedScrollY()
+  const box = useRef({ top: 0, height: 0, vh: 1 })
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const measure = () => {
+      const r = el.getBoundingClientRect()
+      box.current = { top: r.top + window.scrollY, height: r.height, vh: window.innerHeight }
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    ro.observe(document.body)
+    window.addEventListener("resize", measure)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener("resize", measure)
+    }
+  }, [ref])
+  return useTransform(scrollY, (y) => {
+    const { top, height, vh } = box.current
+    const start = top + a[0] * height - a[1] * vh
+    const end = top + b[0] * height - b[1] * vh
+    if (end === start) return y >= end ? 1 : 0
+    return Math.min(1, Math.max(0, (y - start) / (end - start)))
+  })
 }

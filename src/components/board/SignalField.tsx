@@ -44,6 +44,18 @@ export default function SignalField({ reducedMotion }: { reducedMotion: boolean 
           loop?.stop()
           loop = undefined
         }
+        // Warm the pipeline with one frame while the browser is idle, so the shader compile
+        // never lands in the middle of a scroll towards this section.
+        const idle = window.requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 300))
+        idle(() => {
+          if (disposed || loop) return
+          const warm = frameLoop(gpu, (frame) => {
+            frame.pass(surf, fx)
+            requestAnimationFrame(() => {
+              warm.stop()
+            })
+          })
+        })
         const io = new IntersectionObserver(([e]) => (e.isIntersecting ? start() : stop()), { rootMargin: "120px" })
         io.observe(canvas)
         setPath("webgpu")

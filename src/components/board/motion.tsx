@@ -1,7 +1,8 @@
 "use client"
 
 import { Fragment, useRef, useState, type ReactNode, type PointerEvent } from "react"
-import { motion, useMotionValue, useScroll, useSpring, useTransform, type MotionValue } from "framer-motion"
+import { motion, useMotionValue, useSpring, useTransform, type MotionValue } from "framer-motion"
+import { useElementProgress } from "./hooks"
 
 const EASE = [0.16, 1, 0.3, 1] as const
 
@@ -81,14 +82,20 @@ export function Rise({
 }
 
 function Word({ p, from, to, children }: { p: MotionValue<number>; from: number; to: number; children: string }) {
-  const opacity = useTransform(p, [from, to], [0.18, 1])
-  return <motion.span style={{ opacity }}>{children} </motion.span>
+  // Each word flips once as the scroll passes it and CSS eases the change, instead of
+  // repainting the paragraph on every scroll frame.
+  const opacity = useTransform(p, (v) => (v >= (from + to) / 2 ? 1 : 0.18))
+  return (
+    <motion.span className="lit-word" style={{ opacity }}>
+      {children}{" "}
+    </motion.span>
+  )
 }
 
 /** A paragraph that lights up word by word as it passes through the viewport. */
 export function ScrollLitText({ text, reduced, className }: { text: string; reduced: boolean; className?: string }) {
   const ref = useRef<HTMLParagraphElement>(null)
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 85%", "end 45%"] })
+  const scrollYProgress = useElementProgress(ref, [[0, 0.85], [1, 0.45]])
   const words = text.split(" ")
   if (reduced) return <p className={className}>{text}</p>
   return (

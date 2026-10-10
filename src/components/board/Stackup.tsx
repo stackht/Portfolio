@@ -1,7 +1,8 @@
 "use client"
 
 import { useRef } from "react"
-import { motion, useScroll, useTransform, type MotionValue } from "framer-motion"
+import { motion, useTransform, type MotionValue } from "framer-motion"
+import { useElementProgress } from "./hooks"
 import { STACKUP } from "@/content/site"
 
 type Layer = (typeof STACKUP)[number]
@@ -33,10 +34,10 @@ function Slab({ layer, i, n, p }: { layer: Layer; i: number; n: number; p: Motio
   )
 }
 
-/** The stack as a PCB layer stackup that pulls apart as you scroll through it. */
+/** The stack as a layer stackup that pulls apart as you scroll through it. */
 export default function Stackup({ reduced }: { reduced: boolean }) {
   const ref = useRef<HTMLDivElement>(null)
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 75%", "end 60%"] })
+  const scrollYProgress = useElementProgress(ref, [[0, 0.75], [1, 0.6]])
   const n = STACKUP.length
 
   if (reduced) {

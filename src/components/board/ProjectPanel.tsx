@@ -1,11 +1,15 @@
 "use client"
 
-import { useEffect, useRef, useState, type PointerEvent } from "react"
-import { motion, useMotionValue, useScroll, useSpring, useTransform } from "framer-motion"
+import { useEffect, useRef, useState, useSyncExternalStore, type PointerEvent } from "react"
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion"
+import { useElementProgress } from "./hooks"
 import { PROJECTS } from "@/content/site"
 import { drawProjectArt, type ArtKind } from "./art"
 
 type Lens = { destroy?: () => void }
+
+const noop = () => () => {}
+const isCoarsePointer = () => window.matchMedia("(pointer: coarse)").matches
 
 const KINDS: ArtKind[] = ["flow", "lanes", "contours", "path"]
 
@@ -37,13 +41,25 @@ function ProjectArt({ seed, kind, w, h }: { seed: number; kind: ArtKind; w: numb
 type Project = (typeof PROJECTS)[number]
 
 /** One project: tilts toward the cursor, and its art drifts slower than the card as you scroll. */
-function ProjectCard({ p, i, slot, reduced }: { p: Project; i: number; slot: (typeof SLOTS)[number]; reduced: boolean }) {
+function ProjectCard({
+  p,
+  i,
+  slot,
+  reduced,
+  touch,
+}: {
+  p: Project
+  i: number
+  slot: (typeof SLOTS)[number]
+  reduced: boolean
+  touch: boolean
+}) {
   const ref = useRef<HTMLElement>(null)
   const rx = useMotionValue(0)
   const ry = useMotionValue(0)
   const rotateX = useSpring(rx, { stiffness: 160, damping: 18 })
   const rotateY = useSpring(ry, { stiffness: 160, damping: 18 })
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] })
+  const scrollYProgress = useElementProgress(ref, [[0, 1], [1, 0]])
   const artY = useTransform(scrollYProgress, [0, 1], ["-7%", "7%"])
 
   const onMove = (e: PointerEvent<HTMLElement>) => {
@@ -67,7 +83,8 @@ function ProjectCard({ p, i, slot, reduced }: { p: Project; i: number; slot: (ty
       className={`pcb-card ${slot.cls}`}
       onPointerMove={onMove}
       onPointerLeave={onLeave}
-      style={reduced ? undefined : { rotateX, rotateY, transformPerspective: 1100 }}
+      // Touch screens never tilt, so they skip the 3D layer entirely.
+      style={reduced || touch ? undefined : { rotateX, rotateY, transformPerspective: 1100 }}
       initial={reduced ? false : { opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "0px 0px -8% 0px" }}
@@ -103,17 +120,25 @@ export default function ProjectPanel({ reducedMotion }: { reducedMotion: boolean
   const panelRef = useRef<HTMLDivElement>(null)
   const [glass, setGlass] = useState<"pending" | "liquid" | "plain">("pending")
 
+  // Touch screens skip the lens: dragging it is awkward there and it costs a full DOM snapshot.
+  const touch = useSyncExternalStore(noop, isCoarsePointer, () => false)
+
   useEffect(() => {
     const panel = panelRef.current
-    if (!panel) return
+    if (!panel || touch) return
     let lenses: Lens[] = []
     let cancelled = false
+    let running = false
+    let firstRun = true
+    let timer: ReturnType<typeof setTimeout> | undefined
 
     const start = async () => {
+      if (running) return
+      running = true
       try {
         const mod = await import("liquid-gl")
         const liquidGL = mod.default
-        if (cancelled || typeof liquidGL !== "function") return
+        if (cancelled || !running || typeof liquidGL !== "function") return
         const out = liquidGL({
           target: ".loupe",
           snapshot: ".work-panel",
@@ -135,31 +160,59 @@ export default function ProjectPanel({ reducedMotion }: { reducedMotion: boolean
         if (lenis) liquidGL.syncWith?.({ lenis, gsap: false })
         setGlass("liquid")
       } catch {
+        running = false
         if (!cancelled) setGlass("plain")
       }
     }
 
-    // Boot the GPU lens once the panel is near the viewport and the cards have settled.
+    // liquidGL renders every frame while any lens exists, so the lens only lives while
+    // the panel is on screen. Destroying the last lens stops its render loop entirely.
+    const stop = () => {
+      clearTimeout(timer)
+      if (!running) return
+      running = false
+      const old = lenses
+      lenses = []
+      setGlass("pending")
+      // Tear down only once scrolling has settled: destroying a WebGL context mid-scroll
+      // drops frames, and the lens is hidden in the meantime anyway.
+      let settle: ReturnType<typeof setTimeout> | undefined
+      const later = () => {
+        clearTimeout(settle)
+        settle = setTimeout(() => {
+          window.removeEventListener("scroll", later)
+          old.forEach((l) => l.destroy?.())
+        }, 700)
+      }
+      window.addEventListener("scroll", later, { passive: true })
+      later()
+    }
+
     const io = new IntersectionObserver(
       ([e]) => {
-        if (!e.isIntersecting) return
-        io.disconnect()
-        void document.fonts.ready.then(() => setTimeout(start, reducedMotion ? 0 : 1100))
+        if (!e.isIntersecting) return stop()
+        clearTimeout(timer)
+        // First time, let the cards finish their entrance before the snapshot is taken.
+        const delay = firstRun && !reducedMotion ? 1100 : 150
+        firstRun = false
+        void document.fonts.ready.then(() => {
+          timer = setTimeout(start, delay)
+        })
       },
-      { rootMargin: "200px" },
+      { rootMargin: "80px" },
     )
     io.observe(panel)
     return () => {
       cancelled = true
       io.disconnect()
-      lenses.forEach((l) => l.destroy?.())
+      stop()
     }
-  }, [reducedMotion])
+  }, [reducedMotion, touch])
 
   return (
-    <div className="work-panel" ref={panelRef} data-glass={glass}>
+    <div className="work-panel" ref={panelRef} data-glass={touch ? "plain" : glass}>
       {PROJECTS.map((p, i) => (
-        <ProjectCard key={p.id} p={p} i={i} slot={SLOTS[i % SLOTS.length]} reduced={reducedMotion} />
+        <ProjectCard key={p.id} p={p} i={i} slot={SLOTS[i % SLOTS.length]} reduced={reducedMotion} touch={touch} />
       ))}
       <div className="loupe" aria-hidden="true">
         <div className="loupe-content" />
