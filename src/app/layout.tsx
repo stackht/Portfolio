@@ -27,7 +27,9 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: "#f3f4f6",
-  colorScheme: "light",
+  // "only light" stops mobile browsers (Chrome auto-dark, Samsung Internet) from
+  // force-darkening the page and wrecking the ice + cobalt palette.
+  colorScheme: "only light",
 }
 
 export default function RootLayout({
