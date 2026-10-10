@@ -7,7 +7,8 @@
     "build": "next build --webpack",
     "start": "npx serve@latest out",
     "preview": "npx serve@latest out",
-    "lint": "eslint"
+    "lint": "eslint",
+    "deploy": "npm run build && npx wrangler pages deploy"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",
