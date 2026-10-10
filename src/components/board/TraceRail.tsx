@@ -54,6 +54,11 @@ export default function TraceRail({ containerRef }: { containerRef: RefObject<HT
           x = nx
         }
       })
+      // On phones the line carries on past the last node to the middle of the final screen.
+      if (!wide) {
+        const last = rel(document.getElementById("contact"))
+        if (last && last.y > vias[vias.length - 1].y) d += ` V ${last.y}`
+      }
       setGeo({ d, w: box.width, h: root.offsetHeight, vias, labels: wide })
     }
     measure()
