@@ -57,7 +57,7 @@ function Hero({ onJump, reduced }: { onJump: (id: string) => void; reduced: bool
         style={{ opacity: stageOpacity, visibility: stageVisibility }}
       >
         {/* Still glass for browsers without WebGL, and the poster while three.js loads. */}
-        <div className="glass-poster" data-hidden={gl && ready} aria-hidden="true">
+        <div className="glass-poster" data-hidden={gl !== false} aria-hidden="true">
           <i />
         </div>
         {gl && <HeroGlass active={inView} reducedMotion={reduced} onReady={() => setReady(true)} />}
@@ -142,7 +142,7 @@ function About({ reduced }: { reduced: boolean }) {
 function Stack({ reduced }: { reduced: boolean }) {
   const ref = useRef<HTMLElement>(null)
   // The cobalt band opens from a thin line to the full screen as the section arrives.
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 95%", "start 30%"] })
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 100%", "start 65%"] })
   const wipe = useTransform(scrollYProgress, [0, 1], [0, 1])
   return (
     <motion.section

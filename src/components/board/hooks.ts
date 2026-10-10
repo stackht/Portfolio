@@ -41,9 +41,9 @@ function hasWebGL() {
 
 const noop = () => () => {}
 
-/** Whether WebGL is available; false during prerender, real value after hydration. */
-export function useWebGL() {
-  return useSyncExternalStore(noop, hasWebGL, () => false)
+/** Whether WebGL is available: null while prerendering (unknown), then true/false in the browser. */
+export function useWebGL(): boolean | null {
+  return useSyncExternalStore<boolean | null>(noop, hasWebGL, () => null)
 }
 
 /** Id of the section whose top has most recently crossed the upper third of the viewport. */

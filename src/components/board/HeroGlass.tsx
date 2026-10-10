@@ -386,6 +386,21 @@ const smooth = (a: number, b: number, x: number) => {
   return t * t * (3 - 2 * t)
 }
 
+/** Reports ready once a few frames have rendered, so the canvas fades in fully drawn. */
+function ReadySignal({ onReady }: { onReady?: () => void }) {
+  const frames = useRef(0)
+  const done = useRef(false)
+  useFrame(() => {
+    if (done.current) return
+    frames.current += 1
+    if (frames.current >= 3) {
+      done.current = true
+      onReady?.()
+    }
+  })
+  return null
+}
+
 function Rig({ animate, quality }: { animate: boolean; quality: "high" | "low" }) {
   const group = useRef<THREE.Group>(null)
   const shadow = useRef<THREE.Group>(null)
@@ -476,7 +491,7 @@ export default function HeroGlass({
       onCreated={({ gl }) => {
         gl.toneMapping = THREE.ACESFilmicToneMapping
         gl.toneMappingExposure = 1.05
-        requestAnimationFrame(() => onReady?.())
+
       }}
       aria-hidden="true"
     >
@@ -490,6 +505,7 @@ export default function HeroGlass({
         <Lightformer form="rect" intensity={1.5} position={[0, -5, 2]} scale={[10, 1, 1]} />
       </Environment>
       <color attach="background" args={["#f3f4f6"]} />
+      <ReadySignal onReady={onReady} />
       <InteractiveBackdrop animate={!reducedMotion} />
       <FlowLines animate={!reducedMotion} />
       <Rig animate={!reducedMotion} quality={quality} />
