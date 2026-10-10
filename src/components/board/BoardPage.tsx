@@ -16,6 +16,7 @@ import {
 import { ABOUT, EXPERIENCE, LINKS, PERSON } from "@/content/site"
 import { useElementProgress, useInView, useIntroSkipped, useReducedMotion, useSharedScrollY, useWebGL } from "./hooks"
 import TopNav from "./TopNav"
+import Keys from "./Keys"
 import TraceRail from "./TraceRail"
 import ProjectPanel from "./ProjectPanel"
 import Stackup from "./Stackup"
@@ -347,6 +348,7 @@ function Contact({ reduced }: { reduced: boolean }) {
           ))}
         </ul>
       </nav>
+      <Keys reduced={reduced} />
     </section>
   )
 }
