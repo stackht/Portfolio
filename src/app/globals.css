@@ -592,17 +592,24 @@ p {
 .rail-head {
   fill: var(--accent);
 }
-.rail-via .ring {
+/* Section markers are notes: hollow until the line reaches them, then filled. */
+.rail-via .note {
   fill: var(--bg);
-  stroke: var(--line-2);
-  stroke-width: 2;
+  stroke: rgb(13 17 23 / 0.35);
+  stroke-width: 1.8;
   transition: fill 0.4s, stroke 0.4s;
 }
-.rail-via .drill {
-  fill: transparent;
+.rail-via .stem {
+  stroke: rgb(13 17 23 / 0.35);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  transition: stroke 0.4s;
 }
-.rail-via[data-lit="true"] .ring {
+.rail-via[data-lit="true"] .note {
   fill: var(--accent);
+  stroke: var(--accent);
+}
+.rail-via[data-lit="true"] .stem {
   stroke: var(--accent);
 }
 @media (max-width: 959px) {
@@ -1686,13 +1693,104 @@ html[data-motion="reduce"] *::after {
   transition-duration: 0.01ms !important;
 }
 
-/* ─────────────────────────── Writing: the notebook ─────────────────────────── */
+/* About: a writer signs off. */
+.signature {
+  margin-top: 1.25rem;
+  font-family: var(--font-sign), cursive;
+  font-size: clamp(2.6rem, 4vw, 3.4rem);
+  line-height: 1.2;
+  color: var(--accent);
+}
 
-.writing {
+
+/* ─────────────────────── Writer & composer touches (visual only) ─────────────────────── */
+
+/* Hand-drawn ink underline under each heading's last word, drawn once on reveal. */
+.ink-under {
+  position: relative;
+  display: inline-block;
+}
+.ink-line {
+  position: absolute;
+  left: -2%;
+  bottom: -0.12em;
+  width: 104%;
+  height: 0.22em;
+  overflow: visible;
+  pointer-events: none;
+}
+.ink-line path {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+[data-shine] .ink-line path {
+  animation: ink-draw 1.1s cubic-bezier(0.45, 0, 0.25, 1) 0.75s forwards;
+}
+@keyframes ink-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.stack .ink-line path {
+  stroke: rgb(255 255 255 / 0.85);
+}
+
+/* A live equaliser in place of the status dot. */
+.eq-live {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+}
+.eq-live i {
+  width: 3px;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent);
+  transform-origin: bottom;
+  animation: eq-live 1.1s ease-in-out infinite alternate;
+}
+.eq-live i:nth-child(2) {
+  animation-delay: -0.35s;
+}
+.eq-live i:nth-child(3) {
+  animation-delay: -0.7s;
+}
+.eq-live i:nth-child(4) {
+  animation-delay: -0.2s;
+}
+.eq-live i:nth-child(5) {
+  animation-delay: -0.55s;
+}
+@keyframes eq-live {
+  from {
+    transform: scaleY(0.25);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+/* About opens like a chapter: an italic serif drop cap, on faint staff paper. */
+.about-statement::first-letter {
+  float: left;
+  margin: 0.06em 0.1em 0 0;
+  font-family: var(--font-verse), serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 3.1em;
+  line-height: 0.82;
+  color: var(--accent);
+}
+.about {
   isolation: isolate;
 }
-.writing::before {
-  /* Faint manuscript paper: groups of five staff lines across the section. */
+.about::before {
   content: "";
   position: absolute;
   top: 0;
@@ -1704,300 +1802,22 @@ html[data-motion="reduce"] *::after {
   background: repeating-linear-gradient(
     180deg,
     transparent 0 46px,
-    rgb(43 80 255 / 0.07) 46px 47px,
+    rgb(43 80 255 / 0.065) 46px 47px,
     transparent 47px 56px,
-    rgb(43 80 255 / 0.07) 56px 57px,
+    rgb(43 80 255 / 0.065) 56px 57px,
     transparent 57px 66px,
-    rgb(43 80 255 / 0.07) 66px 67px,
+    rgb(43 80 255 / 0.065) 66px 67px,
     transparent 67px 76px,
-    rgb(43 80 255 / 0.07) 76px 77px,
+    rgb(43 80 255 / 0.065) 76px 77px,
     transparent 77px 86px,
-    rgb(43 80 255 / 0.07) 86px 87px,
-    transparent 87px 132px
+    rgb(43 80 255 / 0.065) 86px 87px,
+    transparent 87px 140px
   );
+  -webkit-mask: linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent);
+  mask: linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent);
 }
 @media (max-width: 959px) {
-  .writing::before {
+  .about::before {
     left: calc(50% - 50vw);
-  }
-}
-.writing-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-  margin-top: 2rem;
-}
-.writing-tabs button {
-  position: relative;
-  padding: 0.5rem 0.9rem;
-  border: 0;
-  border-radius: 999px;
-  background: none;
-  color: var(--ink-3);
-  font: 500 0.9375rem/1 var(--font-sans), sans-serif;
-  cursor: pointer;
-  transition: color 0.25s;
-}
-.writing-tabs button:hover,
-.writing-tabs button[aria-selected="true"] {
-  color: var(--ink);
-}
-.tab-ink {
-  position: absolute;
-  left: 0.9rem;
-  right: 0.9rem;
-  bottom: 0.15rem;
-  height: 2px;
-  border-radius: 2px;
-  background: var(--accent);
-}
-.pages {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 1rem;
-  margin: 1.5rem 0 0;
-  padding: 0;
-  list-style: none;
-}
-.page {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  width: 100%;
-  height: 100%;
-  min-height: 15.5rem;
-  padding: 1.2rem 1.15rem 1.1rem 1.6rem;
-  border: 0;
-  border-radius: 6px 16px 16px 6px;
-  background:
-    linear-gradient(90deg, transparent 0.9rem, rgb(200 52 43 / 0.28) 0.9rem calc(0.9rem + 1px), transparent calc(0.9rem + 1px)),
-    #fffdf8;
-  box-shadow:
-    inset 0 0 0 1px rgb(13 17 23 / 0.06),
-    0 18px 34px -22px rgb(28 42 102 / 0.4);
-  color: var(--ink);
-  text-align: left;
-  cursor: pointer;
-  transition:
-    transform 0.5s var(--ease-out),
-    box-shadow 0.5s var(--ease-out);
-}
-.page:hover,
-.page:focus-visible {
-  transform: translateY(-6px) rotate(-0.6deg);
-  box-shadow:
-    inset 0 0 0 1px rgb(13 17 23 / 0.06),
-    0 28px 44px -24px rgb(28 42 102 / 0.5);
-}
-.page-form {
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  color: var(--accent);
-}
-.page--song .page-form {
-  color: #b5562a;
-}
-.page-title {
-  font-family: var(--font-verse), var(--font-deva), serif;
-  font-size: 1.6rem;
-  font-weight: 500;
-  line-height: 1.1;
-}
-.page-excerpt {
-  display: grid;
-  gap: 0.15rem;
-  font-family: var(--font-verse), var(--font-deva), serif;
-  font-style: italic;
-  font-size: 1.0625rem;
-  line-height: 1.45;
-  color: var(--ink-2);
-}
-.page-foot {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  margin-top: auto;
-  padding-top: 0.6rem;
-  border-top: 1px dashed var(--line-2);
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  color: var(--ink-3);
-}
-.eq {
-  display: inline-flex;
-  align-items: flex-end;
-  gap: 2px;
-  height: 14px;
-}
-.eq i {
-  width: 3px;
-  height: 100%;
-  border-radius: 2px;
-  background: var(--accent);
-  transform-origin: bottom;
-  transform: scaleY(0.3);
-  animation: eq 0.9s ease-in-out infinite alternate;
-  animation-delay: var(--d);
-  animation-play-state: paused;
-}
-.page:hover .eq i,
-.page:focus-visible .eq i {
-  animation-play-state: running;
-}
-@keyframes eq {
-  to {
-    transform: scaleY(1);
-  }
-}
-.writing-note {
-  margin-top: 1rem;
-  font-size: 0.875rem;
-  color: var(--ink-3);
-}
-
-/* The reader: one piece, set like a printed page on frosted glass. */
-.reader {
-  position: fixed;
-  inset: 0;
-  z-index: 95;
-  display: grid;
-  place-items: center;
-  padding: 4.5rem var(--gutter) 2rem;
-  overflow-y: auto;
-  background:
-    radial-gradient(60% 60% at 50% 40%, rgb(43 80 255 / 0.14), transparent 70%),
-    rgb(243 244 246 / 0.82);
-  backdrop-filter: blur(18px) saturate(150%);
-  -webkit-backdrop-filter: blur(18px) saturate(150%);
-}
-.sheet {
-  width: min(100%, 36rem);
-  padding: clamp(1.75rem, 4vw, 3rem) clamp(1.5rem, 4vw, 3.25rem);
-  border-radius: 8px 18px 18px 8px;
-  background:
-    linear-gradient(90deg, transparent 1.4rem, rgb(200 52 43 / 0.25) 1.4rem calc(1.4rem + 1px), transparent calc(1.4rem + 1px)),
-    #fffdf8;
-  box-shadow: 0 40px 80px -40px rgb(28 42 102 / 0.5);
-}
-.sheet header {
-  display: grid;
-  gap: 0.5rem;
-  margin-bottom: 1.75rem;
-}
-.sheet-form {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--accent);
-}
-.sheet h3 {
-  font-family: var(--font-verse), var(--font-deva), serif;
-  font-size: clamp(2rem, 4vw, 2.75rem);
-  font-weight: 500;
-  line-height: 1.05;
-}
-.sheet-score {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem 1rem;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--ink-3);
-}
-.verse {
-  display: grid;
-  font-family: var(--font-verse), var(--font-deva), serif;
-  font-size: clamp(1.2rem, 2vw, 1.4rem);
-  line-height: 1.7;
-}
-.verse .line {
-  display: block;
-}
-.stanza-break {
-  height: 1.1em;
-}
-.section-mark {
-  margin: 0.4rem 0 0.1rem;
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  letter-spacing: 0.04em;
-  color: #b5562a;
-}
-.sheet--song .verse .line {
-  /* Lyrics on staff paper: five thin lines under every sung line. */
-  background:
-    linear-gradient(rgb(43 80 255 / 0.13), rgb(43 80 255 / 0.13)) 0 calc(100% - 2px) / 100% 1px no-repeat,
-    linear-gradient(rgb(43 80 255 / 0.13), rgb(43 80 255 / 0.13)) 0 calc(100% - 5px) / 100% 1px no-repeat,
-    linear-gradient(rgb(43 80 255 / 0.13), rgb(43 80 255 / 0.13)) 0 calc(100% - 8px) / 100% 1px no-repeat,
-    linear-gradient(rgb(43 80 255 / 0.13), rgb(43 80 255 / 0.13)) 0 calc(100% - 11px) / 100% 1px no-repeat,
-    linear-gradient(rgb(43 80 255 / 0.13), rgb(43 80 255 / 0.13)) 0 calc(100% - 14px) / 100% 1px no-repeat;
-  padding-bottom: 4px;
-}
-.sheet-note {
-  margin-top: 1.75rem;
-  font-size: 0.8125rem;
-  color: var(--ink-3);
-}
-.reader-close {
-  position: fixed;
-  top: 1.25rem;
-  right: var(--gutter);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  height: 44px;
-  padding: 0 1.1rem;
-  border: 0;
-  border-radius: 999px;
-  background: var(--ink);
-  color: #fff;
-  font: 600 0.9375rem/1 var(--font-sans), sans-serif;
-  cursor: pointer;
-  transition: transform 0.3s var(--ease-out), background-color 0.25s;
-}
-.reader-close:hover {
-  background: var(--accent);
-  transform: scale(1.04);
-}
-
-/* About: a writer signs off. */
-.signature {
-  margin-top: 1.25rem;
-  font-family: var(--font-sign), cursive;
-  font-size: clamp(2.6rem, 4vw, 3.4rem);
-  line-height: 1.2;
-  color: var(--accent);
-}
-.facts {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-@media (min-width: 960px) and (min-height: 600px) {
-  .page {
-    min-height: min(15.5rem, 34dvh);
-  }
-  .writing-tabs {
-    margin-top: 2.5dvh;
-  }
-}
-@media (max-width: 1100px) {
-  .pages {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-@media (max-width: 760px) {
-  .pages {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.6rem;
-  }
-  .page {
-    min-height: 12.5rem;
-    padding: 1rem 0.9rem 0.9rem 1.35rem;
-  }
-  .page-title {
-    font-size: 1.3rem;
-  }
-  .page-excerpt {
-    font-size: 0.9375rem;
   }
 }

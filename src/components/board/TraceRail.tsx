@@ -32,7 +32,7 @@ export default function TraceRail({ containerRef }: { containerRef: RefObject<HT
       const wide = window.innerWidth >= 960
       const laneA = wide ? 14 : 6
       const laneB = wide ? 34 : 6
-      const led = rel(root.querySelector(".hero-status .led"))
+      const led = rel(root.querySelector(".hero-status .eq-live"))
       const anchors = NAV.map((n) => ({ ref: n.ref, p: rel(document.getElementById(n.id)?.querySelector("[data-via]")) })).filter(
         (a) => a.p,
       ) as { ref: string; p: { y: number } }[]
@@ -120,8 +120,11 @@ export default function TraceRail({ containerRef }: { containerRef: RefObject<HT
           <circle ref={head} r="5" className="rail-head" />
           {geo.vias.map((v, i) => (
             <g key={v.ref} transform={`translate(${v.x} ${v.y})`} className="rail-via" data-lit={i <= lit}>
-              <circle r={geo.labels ? 8 : 5} className="ring" />
-              <circle r={geo.labels ? 3.4 : 2} className="drill" />
+              {/* Each section is a note on the line: a slanted note head with a stem. */}
+              <g transform={geo.labels ? "scale(1)" : "scale(0.7)"}>
+                <line className="stem" x1="6.2" y1="-1.5" x2="6.2" y2="-24" />
+                <ellipse className="note" rx="7.4" ry="5.2" transform="rotate(-22)" />
+              </g>
             </g>
           ))}
         </svg>

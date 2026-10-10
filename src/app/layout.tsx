@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next"
-import { Funnel_Display, Funnel_Sans, Martian_Mono, EB_Garamond, Tiro_Devanagari_Hindi, Mrs_Saint_Delafield } from "next/font/google"
+import { Funnel_Display, Funnel_Sans, Martian_Mono, EB_Garamond, Mrs_Saint_Delafield } from "next/font/google"
 import Script from "next/script"
 import "./globals.css"
 import ConsoleSilencer from "../components/ConsoleSilencer"
@@ -20,16 +20,10 @@ const mono = Martian_Mono({
   axes: ["wdth"],
 })
 
-// Writer's faces: verse in a literary serif (Devanagari falls back to Tiro), and a signature hand.
+// Writer's faces: a literary serif for drop caps, and a signature hand.
 const verse = EB_Garamond({
   variable: "--font-verse",
   subsets: ["latin"],
-  style: ["normal", "italic"],
-})
-const deva = Tiro_Devanagari_Hindi({
-  variable: "--font-deva",
-  subsets: ["devanagari", "latin"],
-  weight: "400",
   style: ["normal", "italic"],
 })
 const signature = Mrs_Saint_Delafield({
@@ -59,7 +53,7 @@ export default function RootLayout({
 }>) {
   return (
     // Browser extensions often add attributes to <html> before React hydrates; ignore those.
-    <html lang="en" className={`${display.variable} ${sans.variable} ${mono.variable} ${verse.variable} ${deva.variable} ${signature.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${display.variable} ${sans.variable} ${mono.variable} ${verse.variable} ${signature.variable}`} suppressHydrationWarning>
       <body>
         {/* Decide before hydration whether the opening shot plays (once per session). */}
         <Script id="intro-gate" strategy="beforeInteractive">

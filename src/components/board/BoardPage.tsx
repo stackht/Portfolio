@@ -19,7 +19,6 @@ import TopNav from "./TopNav"
 import TraceRail from "./TraceRail"
 import ProjectPanel from "./ProjectPanel"
 import Stackup from "./Stackup"
-import Writing from "./Writing"
 import { Magnetic, RevealHeading, Rise, ScrollLitText } from "./motion"
 
 const HeroGlass = dynamic(() => import("./HeroGlass"), { ssr: false })
@@ -145,7 +144,14 @@ function Hero({ onJump, reduced }: { onJump: (id: string) => void; reduced: bool
           </Magnetic>
         </motion.div>
         <motion.p className="hero-status" {...intro(2)}>
-          <i className="led" aria-hidden="true" />
+          {/* A composer's touch: a small live equaliser instead of a status dot. */}
+          <span className="eq-live" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+            <i />
+            <i />
+          </span>
           {PERSON.status}
         </motion.p>
       </div>
@@ -427,7 +433,6 @@ export default function BoardPage() {
         <Stack reduced={reduced} />
         <Work reduced={reduced} />
         <Log reduced={reduced} />
-        <Writing reduced={reduced} />
         <Contact reduced={reduced} />
       </main>
     </div>

@@ -38,8 +38,8 @@ export function RevealHeading({
       data-shine={shine || undefined}
       aria-label={text}
     >
-      {words.map((w, i) => (
-        <Fragment key={i}>
+      {words.map((w, i) => {
+        const word = (
           <span className="rv-mask" aria-hidden="true">
             <motion.span
               className="rv-word"
@@ -49,9 +49,24 @@ export function RevealHeading({
               {w}
             </motion.span>
           </span>
-          {i < words.length - 1 ? " " : null}
-        </Fragment>
-      ))}
+        )
+        return (
+          <Fragment key={i}>
+            {i === words.length - 1 ? (
+              // A writer's touch: a hand-drawn ink line writes itself under the last word.
+              <span className="ink-under">
+                {word}
+                <svg className="ink-line" viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true">
+                  <path d="M2 8.5 C 18 4, 34 10.5, 52 6.5 S 82 4.5, 98 7" pathLength={1} />
+                </svg>
+              </span>
+            ) : (
+              word
+            )}
+            {i < words.length - 1 ? " " : null}
+          </Fragment>
+        )
+      })}
     </Tag>
   )
 }
