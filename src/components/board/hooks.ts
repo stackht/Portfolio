@@ -3,16 +3,29 @@
 import { useEffect, useRef, useState, useSyncExternalStore, type RefObject } from "react"
 import { motionValue, useTransform, type MotionValue } from "framer-motion"
 
+// Motion is a site setting, not the OS one: full motion by default, and visitors who need calm
+// switch it off in the orb menu. The choice is remembered and applied before first paint
+// (see the gate script in layout.tsx), so reduced-motion visitors never see a flash of animation.
+const MOTION_KEY = "ht-motion"
+const motionListeners = new Set<() => void>()
+const readReduced = () => document.documentElement.dataset.motion === "reduce"
+const subscribeMotion = (cb: () => void) => {
+  motionListeners.add(cb)
+  return () => void motionListeners.delete(cb)
+}
+
+export function setReducedMotion(reduce: boolean) {
+  document.documentElement.dataset.motion = reduce ? "reduce" : "full"
+  try {
+    localStorage.setItem(MOTION_KEY, reduce ? "reduce" : "full")
+  } catch {
+    /* private mode: the choice lasts for this page view */
+  }
+  motionListeners.forEach((cb) => cb())
+}
+
 export function useReducedMotion() {
-  const [reduced, setReduced] = useState(false)
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)")
-    const update = () => setReduced(mq.matches)
-    update()
-    mq.addEventListener("change", update)
-    return () => mq.removeEventListener("change", update)
-  }, [])
-  return reduced
+  return useSyncExternalStore(subscribeMotion, readReduced, () => false)
 }
 
 export function useInView(ref: RefObject<Element | null>, rootMargin = "0px") {

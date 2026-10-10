@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { NAV, PERSON } from "@/content/site"
-import { useActiveSection, useReducedMotion } from "./hooks"
+import { setReducedMotion, useActiveSection, useReducedMotion } from "./hooks"
 
 const IDS = NAV.map((n) => n.id)
 const EASE = [0.16, 1, 0.3, 1] as const
@@ -90,6 +90,17 @@ export default function TopNav({ onJump }: { onJump: (id: string) => void }) {
                   </motion.li>
                 ))}
               </ul>
+              {/* Motion is on by default; visitors who need calm can switch it off here. */}
+              <button
+                type="button"
+                className="motion-toggle"
+                aria-pressed={!reduced}
+                onClick={() => setReducedMotion(!reduced)}
+                title={reduced ? "Turn animations on" : "Turn animations off"}
+              >
+                <i aria-hidden="true" />
+                Motion {reduced ? "off" : "on"}
+              </button>
             </motion.nav>
           )}
         </AnimatePresence>

@@ -45,7 +45,7 @@ export default function RootLayout({
       <body>
         {/* Decide before hydration whether the opening shot plays (once per session). */}
         <Script id="intro-gate" strategy="beforeInteractive">
-          {"try{if(sessionStorage.getItem('ht-intro'))document.documentElement.dataset.intro='skip';else sessionStorage.setItem('ht-intro','1')}catch(e){document.documentElement.dataset.intro='skip'}"}
+          {"var d=document.documentElement;try{d.dataset.motion=localStorage.getItem('ht-motion')==='reduce'?'reduce':'full'}catch(e){d.dataset.motion='full'}try{if(sessionStorage.getItem('ht-intro'))d.dataset.intro='skip';else sessionStorage.setItem('ht-intro','1')}catch(e){d.dataset.intro='skip'}"}
         </Script>
         <ConsoleSilencer />
         {children}
