@@ -30,13 +30,15 @@
   --r-box: 20px;
 
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  /* Opt out of forced dark modes on mobile browsers; the palette is light by design. */
-  color-scheme: only light;
+  /* Claim dark support so phones and in-app browsers don't force-darken the page;
+     every colour below is explicit, so it renders the same light palette anyway. */
+  color-scheme: light dark;
 }
 
 html {
   overflow-x: clip;
   background: var(--bg);
+  color: var(--ink);
   scroll-padding-top: 24px;
   -webkit-text-size-adjust: 100%;
 }

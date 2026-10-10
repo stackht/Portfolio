@@ -27,9 +27,10 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: "#f3f4f6",
-  // "only light" stops mobile browsers (Chrome auto-dark, Samsung Internet) from
-  // force-darkening the page and wrecking the ice + cobalt palette.
-  colorScheme: "only light",
+  // Declaring dark support is what stops forced darkening: Chrome's auto-dark and
+  // Android WebView (in-app browsers) leave pages that claim to handle dark mode
+  // alone. Every colour is set explicitly in globals.css, so the page stays light.
+  colorScheme: "light dark",
 }
 
 export default function RootLayout({
