@@ -4,9 +4,9 @@
 export const PERSON = {
   name: "Hemant Thakur",
   initials: "HT",
-  role: "Computer Engineering student",
+  role: "Engineer, writer and composer",
   summary:
-    "I build across the whole stack, from bare-metal C and OS internals to machine learning and the browser.",
+    "Computer engineering student building across the stack, from bare-metal C to the browser, and writing verses in between.",
   status: "Open to internships and research",
 }
 
@@ -31,6 +31,7 @@ export const NAV = [
   { ref: "U2", id: "stack", label: "Stack" },
   { ref: "U3", id: "work", label: "Work" },
   { ref: "U4", id: "log", label: "Log" },
+  { ref: "U5", id: "writing", label: "Writing" },
   { ref: "J1", id: "contact", label: "Contact" },
 ] as const
 
@@ -38,12 +39,13 @@ export const ABOUT = {
   heading: "Curious by design.",
   body: [
     "I'm Hemant, a Computer Engineering student working where hardware meets software: custom OS internals, multi-core ARMv8, predictive models, and interfaces people actually enjoy using.",
-    "I learn by building, and I build things I would use myself. Precise, deliberate, and measured by outcomes rather than demos.",
+    "I learn by building, and when the code sleeps I write: shayari, poems, and songs I compose myself. Both are about finding the exact word, or the exact line, that makes the whole thing work.",
   ],
   question: "What becomes possible when every layer of the stack is genuinely understood?",
   specs: [
     ["Discipline", "Computer Engineering"],
     ["Works across", "Systems · ML · Web & graphics"],
+    ["Also writes", "Shayari · poems · songs"],
     ["Looking for", "Internships, research, hard problems"],
   ] as const,
 }
@@ -149,3 +151,104 @@ export const EXPERIENCE = [
     copy: "Contributed to open research projects, making complex systems legible and reproducible.",
   },
 ] as const
+
+export type WritingForm = "Shayari" | "Poem" | "Song"
+
+/**
+ * SAMPLE PIECES: written as stand-ins so the section can be designed. Replace them with your
+ * own shayari, poems and songs, then set WRITING_IS_SAMPLE to false.
+ * Lines can be in any script (Devanagari and Roman Hindi both work).
+ */
+export const WRITING: {
+  id: string
+  form: WritingForm
+  title: string
+  year: string
+  lang: string
+  /** Songs: the composer's sheet details. */
+  key?: string
+  tempo?: string
+  /** Blank strings separate stanzas; lines starting with "[" are section labels (e.g. [Chorus]). */
+  lines: string[]
+}[] = [
+  {
+    id: "semicolon",
+    form: "Shayari",
+    title: "Semicolon",
+    year: "2025",
+    lang: "Roman Hindi",
+    lines: [
+      "Raat bhar code likha, subah tak bug na mila,",
+      "tumhari yaad ka ek semicolon chhoot gaya tha.",
+    ],
+  },
+  {
+    id: "khamoshi",
+    form: "Shayari",
+    title: "खामोशी",
+    year: "2024",
+    lang: "Hindi",
+    lines: ["बातें तो बहुत थीं, लफ़्ज़ कम पड़ गए,", "ख़ामोशी ने कह दिया जो हम कह न सके।"],
+  },
+  {
+    id: "compile",
+    form: "Poem",
+    title: "Compile",
+    year: "2025",
+    lang: "English",
+    lines: [
+      "I write the way I build:",
+      "a line, a test, a quiet wait",
+      "for something small to hold its weight.",
+      "",
+      "Some nights the words won't run.",
+      "I read them back, I trace the call,",
+      "and find the one that broke them all.",
+      "",
+      "Then morning, and it compiles,",
+      "not perfect, only true enough",
+      "to send into the world, and love.",
+    ],
+  },
+  {
+    id: "monsoon-signal",
+    form: "Song",
+    title: "Monsoon Signal",
+    year: "2025",
+    lang: "Hindi · English",
+    key: "D minor",
+    tempo: "84 BPM",
+    lines: [
+      "[Verse]",
+      "Bheegi si sadkon pe tera naam likha,",
+      "har boond mein ek purana paigaam likha.",
+      "",
+      "[Chorus]",
+      "Signal kho jaaye, tu paas rehna,",
+      "baarish ke shor mein bhi mujhse kehna.",
+      "",
+      "[Verse]",
+      "City lights blur into a slower song,",
+      "I've been waiting for the rain all along.",
+    ],
+  },
+  {
+    id: "neend",
+    form: "Song",
+    title: "Neend",
+    year: "2024",
+    lang: "Hindi",
+    key: "A major",
+    tempo: "72 BPM",
+    lines: [
+      "[Verse]",
+      "Chaand ki khidki pe baithi hai raat,",
+      "dheere se kehti hai poori baat.",
+      "",
+      "[Chorus]",
+      "So ja, so ja, sapnon ke paar,",
+      "subah tak rakh lenge hum intezaar.",
+    ],
+  },
+]
+export const WRITING_IS_SAMPLE = true

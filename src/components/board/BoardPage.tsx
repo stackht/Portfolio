@@ -19,6 +19,7 @@ import TopNav from "./TopNav"
 import TraceRail from "./TraceRail"
 import ProjectPanel from "./ProjectPanel"
 import Stackup from "./Stackup"
+import Writing from "./Writing"
 import { Magnetic, RevealHeading, Rise, ScrollLitText } from "./motion"
 
 const HeroGlass = dynamic(() => import("./HeroGlass"), { ssr: false })
@@ -115,8 +116,7 @@ function Hero({ onJump, reduced }: { onJump: (id: string) => void; reduced: bool
           ))}
         </h1>
         <motion.p className="hero-role" {...intro(0)}>
-          Computer engineering student building across the stack, from bare-metal C and OS internals to machine
-          learning and the browser.
+          {PERSON.summary}
         </motion.p>
         <motion.div className="hero-actions" {...intro(1)}>
           <Magnetic reduced={reduced}>
@@ -161,6 +161,17 @@ function About({ reduced }: { reduced: boolean }) {
       <div className="about-foot">
         <Rise reduced={reduced} className="about-body">
           <p>{ABOUT.body[1]}</p>
+          {/* A writer signs off: the name writes itself across as it comes into view. */}
+          <motion.p
+            className="signature"
+            aria-label={`Signed, ${PERSON.name}`}
+            initial={reduced ? false : { clipPath: "inset(0 100% 0 0)" }}
+            whileInView={{ clipPath: "inset(0 0% 0 0)" }}
+            viewport={{ once: true, margin: "0px 0px -10% 0px" }}
+            transition={{ duration: 1.8, ease: [0.45, 0, 0.25, 1], delay: 0.3 }}
+          >
+            <span aria-hidden="true">Hemant</span>
+          </motion.p>
         </Rise>
         <dl className="facts">
           {ABOUT.specs.map(([k, v], i) => (
@@ -416,6 +427,7 @@ export default function BoardPage() {
         <Stack reduced={reduced} />
         <Work reduced={reduced} />
         <Log reduced={reduced} />
+        <Writing reduced={reduced} />
         <Contact reduced={reduced} />
       </main>
     </div>
